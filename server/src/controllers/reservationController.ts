@@ -55,12 +55,14 @@ export function updateTable(req: Request, res: Response, next: NextFunction) {
 
 // Admin: printable QR image (open in browser → print). PNG of the menu URL.
 export function qrPng(req: Request, res: Response, next: NextFunction) {
-  svc.getQr(Number(req.params.id))
+  const host = (req.headers["x-forwarded-host"] || req.headers.host)?.toString();
+  svc.getQr(Number(req.params.id), host)
     .then((qr) => QRCode.toBuffer(qr.url, { width: 512, margin: 2 }))
     .then((png) => res.type("png").send(png))
     .catch(next);
 }
 
 export function regenerateQr(req: Request, res: Response, next: NextFunction) {
-  svc.regenerateQr(Number(req.params.id)).then((qr) => res.json({ qr })).catch(next);
+  const host = (req.headers["x-forwarded-host"] || req.headers.host)?.toString();
+  svc.regenerateQr(Number(req.params.id), host).then((qr) => res.json({ qr })).catch(next);
 }

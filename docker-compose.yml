@@ -30,6 +30,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-palatia_super_secret_jwt_key_2026}
       PORT: 4000
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      PUBLIC_URL: ${PUBLIC_URL:-https://palatia.thefarhany.xyz}
       NODE_ENV: production
     ports:
       - "4000:4000"

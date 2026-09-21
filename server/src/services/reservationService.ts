@@ -160,10 +160,19 @@ export function newQrToken(): string {
   return crypto.randomBytes(8).toString("hex"); // 16 hex chars — unguessable enough for a table QR
 }
 
-export function qrUrl(token: string): string {
-  // Contract with the web app: public menu reads the `t` query param and
-  // resolves it via GET /api/public/table/:token.
-  return `${env.PUBLIC_URL}/menu?t=${token}`;
+export function qrUrl(token: string, reqHost?: string): string {
+  // If PUBLIC_URL is explicitly set in env, use it.
+  // Otherwise if reqHost is passed (from request headers), dynamically resolve frontend origin.
+  let origin = process.env.PUBLIC_URL;
+  if (!origin && reqHost) {
+    const proto = reqHost.includes("localhost") || reqHost.includes("127.0.0.1") ? "http" : "https";
+    const frontendHost = reqHost.replace("api-palatia.", "palatia.");
+    origin = `${proto}://${frontendHost}`;
+  }
+  if (!origin) {
+    origin = env.PUBLIC_URL || "http://localhost:3000";
+  }
+  return `${origin}/menu?t=${token}`;
 }
 
 export function createTable(data: { number: number; capacity: number; status?: "FREE" | "OCCUPIED" | "RESERVED" | "OUT_OF_SERVICE" }) {
@@ -172,19 +181,19 @@ export function createTable(data: { number: number; capacity: number; status?: "
 
 // Rotating the token invalidates every printed QR for this table — that IS the
 // revoke/delete of "QR CRUD". No separate QR storage; the token lives on the table row.
-export async function regenerateQr(tableId: number) {
+export async function regenerateQr(tableId: number, reqHost?: string) {
   const table = await prisma.restaurantTable.findUnique({ where: { id: tableId } });
   if (!table) throw new HttpError(404, "Not found");
   const token = newQrToken();
   await prisma.restaurantTable.update({ where: { id: tableId }, data: { qrToken: token } });
-  return { tableId, token, url: qrUrl(token) };
+  return { tableId, token, url: qrUrl(token, reqHost) };
 }
 
-export async function getQr(tableId: number) {
+export async function getQr(tableId: number, reqHost?: string) {
   const table = await prisma.restaurantTable.findUnique({ where: { id: tableId } });
   if (!table) throw new HttpError(404, "Not found");
-  const token = table.qrToken ?? (await regenerateQr(tableId)).token; // legacy rows from before the column existed
-  return { tableId, token, url: qrUrl(token) };
+  const token = table.qrToken ?? (await regenerateQr(tableId, reqHost)).token; // legacy rows from before the column existed
+  return { tableId, token, url: qrUrl(token, reqHost) };
 }
 
 // Public: a scanned QR resolves to its table (UC-06). Token unknown → 404.
