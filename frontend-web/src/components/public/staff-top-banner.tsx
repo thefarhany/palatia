@@ -1,10 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShieldAlert, ArrowRight } from "lucide-react";
 import { ROLE_HOME } from "@/lib/auth-server";
 import type { User } from "@/lib/types";
 
 export function StaffTopBanner({ user }: { user?: User | null }) {
-  if (!user || user.role === "CUSTOMER") return null;
+  const pathname = usePathname();
+
+  if (!user || user.role === "CUSTOMER" || pathname.startsWith("/login") || pathname.startsWith("/register")) {
+    return null;
+  }
 
   const roleLabel =
     user.role === "WAITER"

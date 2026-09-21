@@ -29,6 +29,11 @@ export function HomeNavbar() {
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Hide Navbar on customer/staff login and register pages
+  if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+    return null;
+  }
+
   // Fetch user profile on mount if token cookie exists
   useEffect(() => {
     if (typeof document !== "undefined" && document.cookie.split(";").some((c) => c.trim().startsWith("token="))) {

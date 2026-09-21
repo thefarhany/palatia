@@ -42,40 +42,37 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  // Exclude API calls, upload route, and WebSocket connections from PWA cache to preserve real-time state
+  // Exclude API calls, proxy routes, upload routes, and WebSocket connections from PWA cache
   if (
     url.pathname.startsWith("/api") ||
     url.pathname.startsWith("/bo") ||
     url.pathname.startsWith("/uploads") ||
-    url.pathname.startsWith("/socket.io")
+    url.pathname.startsWith("/socket.io") ||
+    url.hostname.includes("api-palatia")
   ) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          if (
-            networkResponse &&
-            networkResponse.status === 200 &&
-            networkResponse.type === "basic"
-          ) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // If offline and request is HTML document, return root cached page
-          if (event.request.headers.get("accept")?.includes("text/html")) {
-            return caches.match("/");
-          }
-        });
+      if (cachedResponse) {
+        // Stale-while-revalidate background update
+        fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+            }
+          })
+          .catch(() => {});
+        return cachedResponse;
+      }
 
-      return cachedResponse || fetchPromise;
+      return fetch(event.request).catch(() => {
+        if (event.request.headers.get("accept")?.includes("text/html")) {
+          return caches.match("/");
+        }
+      });
     })
   );
 });
