@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CHEF
+  WAITER
+  CUSTOMER
+}
+
+enum TableStatus {
+  FREE
+  OCCUPIED
+  RESERVED
+  OUT_OF_SERVICE
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  DINE_IN
+  PICKUP
+  TAKEAWAY
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  SERVED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD_AT_COUNTER
+}
+
+enum PurchaseStatus {
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(CUSTOMER)
+  avatar        String?  @db.VarChar(300)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservations  Reservation[]
+  orders        Order[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model MenuItem {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  category    String
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  available   Boolean  @default(true)
+  isFeatured  Boolean  @default(false) // ★ Best Seller badge on the public menu
+  imageUrl    String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+  recipeItems RecipeItem[]
+
+  @@index([category, available])
+  @@map("menu_items")
+}
+
+model RestaurantTable {
+  id        Int         @id @default(autoincrement())
+  number    Int         @unique
+  capacity  Int
+  status    TableStatus @default(FREE)
+  // Random token embedded in the printed QR (public menu URL ?t=). Rotating it
+  // invalidates printed QRs — that's the "revoke" primitive; no separate table.
+  qrToken   String?     @unique @db.VarChar(32)
+  createdAt DateTime    @default(now())
+
+  reservations Reservation[]
+  orders       Order[]
+
+  @@map("tables")
+}
+
+model Reservation {
+  id        Int               @id @default(autoincrement())
+  userId    Int?
+  tableId   Int
+  date      DateTime          @db.Date
+  slot      String            @db.VarChar(20) // validated by Zod against SLOTS, kept as human value ("19:00")
+  guests    Int
+  // Guest (anonymous web) reservations carry name+phone instead of an account.
+  name      String?           @db.VarChar(100)
+  phone     String?           @db.VarChar(30)
+  status    ReservationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user   User?            @relation(fields: [userId], references: [id])
+  table  RestaurantTable  @relation(fields: [tableId], references: [id])
+
+  // Double-booking guard: same table can only have ONE reservation per date+slot,
+  // regardless of status — DB is the source of truth, app never check-then-inserts.
+  @@unique([tableId, date, slot])
+  @@index([date])
+  @@index([userId])
+  @@index([status])
+  @@map("reservations")
+}
+
+model Order {
+  id            Int            @id @default(autoincrement())
+  code          String         @unique
+  // Unguessable token for guest (anonymous QR) tracking & payment — the ORD-xxxxx
+  // code is sequential and guessable, so guests never address orders by code.
+  trackingToken String?        @unique @db.VarChar(32)
+  customerId    Int?
+  tableId       Int?
+  type          OrderType
+  status        OrderStatus    @default(PENDING)
+  paymentStatus PaymentStatus  @default(UNPAID)
+  paymentMethod PaymentMethod?
+  subtotal      Decimal        @db.Decimal(10, 2)
+  tax           Decimal        @default(0) @db.Decimal(10, 2)
+  serviceCharge Decimal        @default(0) @db.Decimal(10, 2)
+  discount      Decimal        @default(0) @db.Decimal(10, 2)
+  total         Decimal        @db.Decimal(10, 2)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  customer   User?            @relation(fields: [customerId], references: [id])
+  table      RestaurantTable? @relation(fields: [tableId], references: [id])
+  items      OrderItem[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([createdAt])
+  @@index([paymentStatus])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  menuItemId Int
+  qty        Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  notes      String? @db.VarChar(255)
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model Ingredient {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  unit          String   @db.VarChar(20)
+  stock         Decimal  @default(0) @db.Decimal(12, 3)
+  reorderLevel  Decimal  @default(0) @db.Decimal(12, 3)
+  supplierName  String?
+  supplierPhone String?  @db.VarChar(30)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  recipeItems   RecipeItem[]
+  purchaseItems PurchaseItem[]
+
+  @@map("ingredients")
+}
+
+model RecipeItem {
+  id           Int     @id @default(autoincrement())
+  menuItemId   Int
+  ingredientId Int
+  qty          Decimal @db.Decimal(10, 3)
+
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@unique([menuItemId, ingredientId])
+  @@map("recipe_items")
+}
+
+model PurchaseOrder {
+  id           Int           @id @default(autoincrement())
+  code         String        @unique
+  status       PurchaseStatus @default(ORDERED)
+  supplierName String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  items PurchaseItem[]
+
+  @@map("purchase_orders")
+}
+
+model PurchaseItem {
+  id              Int     @id @default(autoincrement())
+  purchaseOrderId Int
+  ingredientId    Int
+  qty             Decimal @db.Decimal(12, 3)
+  unitCost        Decimal @db.Decimal(10, 2)
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  ingredient    Ingredient    @relation(fields: [ingredientId], references: [id])
+
+  @@map("purchase_items")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   @db.VarChar(50)
+  payload   Json
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int
+  action    String   @db.VarChar(50)
+  entity    String   @db.VarChar(50)
+  entityId  Int?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}

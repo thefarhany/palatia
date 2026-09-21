@@ -1,0 +1,18 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface SidebarState {
+  collapsed: boolean;
+  toggle: () => void;
+}
+
+/** Collapse sidebar — persist ke localStorage, survives navigation. */
+export const useSidebarStore = create<SidebarState>()(
+  persist(
+    (set) => ({
+      collapsed: false,
+      toggle: () => set((s) => ({ collapsed: !s.collapsed })),
+    }),
+    { name: "palatia-sidebar" },
+  ),
+);
