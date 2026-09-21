@@ -68,10 +68,16 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      return fetch(event.request).catch(() => {
+      return fetch(event.request).catch(async () => {
         if (event.request.headers.get("accept")?.includes("text/html")) {
-          return caches.match("/");
+          const fallback = await caches.match("/");
+          if (fallback) return fallback;
         }
+        return new Response("Network Error", {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: { "Content-Type": "text/plain" },
+        });
       });
     })
   );

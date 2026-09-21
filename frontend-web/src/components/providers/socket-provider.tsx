@@ -13,6 +13,19 @@ export function useSocketEvent(event: string, handler: Handler) {
   useEffect(() => on(event, handler), [event, on, handler]);
 }
 
+function getSocketUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host !== "localhost" && host !== "127.0.0.1") {
+      return window.location.origin;
+    }
+  }
+  return "http://localhost:4000";
+}
+
 /**
  * Socket connects on mount; events fan out through a local emitter so
  * subscribers never depend on connection timing (and no setState-in-effect).
@@ -31,7 +44,8 @@ export function SocketProvider({ token, children }: { token: string; children: R
   }, []);
 
   useEffect(() => {
-    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000", {
+    const targetUrl = getSocketUrl();
+    const socket: Socket = io(targetUrl, {
       auth: { token },
       reconnectionDelay: 2000,
     });

@@ -8,38 +8,57 @@ const TOKEN_COOKIE = "palatia_token";
 /**
  * BFF proxy: browser calls /api/proxy/<express-path>, we forward with the
  * httpOnly JWT attached. Same-origin → no CORS, token never readable by JS.
- * JSON bodies are buffered; anything else (multipart upload) streams through.
+ * Request bodies are buffered as ArrayBuffer to safely handle multipart form-data
+ * (image uploads) and JSON without Node stream socket drops.
  */
 async function forward(req: NextRequest, path: string) {
   const token = (await cookies()).get(TOKEN_COOKIE)?.value;
   const reqContentType = req.headers.get("content-type") ?? "";
   const isJson = reqContentType.includes("application/json");
-  const body =
-    req.method === "GET" || req.method === "HEAD"
-      ? undefined
-      : isJson
-        ? await req.text()
-        : req.body;
+
+  let body: BodyInit | undefined = undefined;
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    if (isJson) {
+      body = await req.text();
+    } else {
+      // Buffer binary/multipart data to prevent duplex streaming socket resets on Express
+      const arrayBuffer = await req.arrayBuffer();
+      body = Buffer.from(arrayBuffer);
+    }
+  }
+
   const res = await fetch(`${API_URL}/api${path}`, {
     method: req.method,
     headers: {
       ...(reqContentType ? { "Content-Type": reqContentType } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    // @ts-expect-error duplex is required for streaming request bodies
-    duplex: "half",
     body,
+  }).catch((err) => {
+    console.error("[Proxy Fetch Error]", path, err);
+    return null;
   });
+
+  if (!res) {
+    return NextResponse.json(
+      { success: false, message: "Gagal terhubung ke backend API server" },
+      { status: 503 }
+    );
+  }
+
   const contentType = res.headers.get("Content-Type") ?? "application/json";
+
   // 204/304 must carry no body — a "" body makes NextResponse throw (500).
   if (res.status === 204 || res.status === 304) {
     return new NextResponse(null, { status: res.status });
   }
+
   // Binary (QR PNG, images) must pass through as bytes — res.text() would corrupt them.
   const data =
     contentType.startsWith("image/") || contentType === "application/pdf"
       ? await res.arrayBuffer()
       : await res.text();
+
   return new NextResponse(data, {
     status: res.status,
     headers: { "Content-Type": contentType },
