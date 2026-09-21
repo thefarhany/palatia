@@ -42,13 +42,15 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
+  // Bypass external cross-origin requests (e.g., static.cloudflareinsights.com, CDNs, external APIs)
+  if (url.origin !== self.location.origin) return;
+
   // Exclude API calls, proxy routes, upload routes, and WebSocket connections from PWA cache
   if (
     url.pathname.startsWith("/api") ||
     url.pathname.startsWith("/bo") ||
     url.pathname.startsWith("/uploads") ||
-    url.pathname.startsWith("/socket.io") ||
-    url.hostname.includes("api-palatia")
+    url.pathname.startsWith("/socket.io")
   ) {
     return;
   }

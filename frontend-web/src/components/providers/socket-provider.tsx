@@ -14,12 +14,20 @@ export function useSocketEvent(event: string, handler: Handler) {
 }
 
 function getSocketUrl(): string {
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_SOCKET_URL;
+  }
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    return apiUrl.endsWith("/api") ? apiUrl.slice(0, -4) : apiUrl;
   }
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     if (host !== "localhost" && host !== "127.0.0.1") {
+      // If running on palatia.thefarhany.xyz, backend socket server is on api-palatia.thefarhany.xyz
+      if (host.startsWith("palatia.")) {
+        return window.location.origin.replace("://palatia.", "://api-palatia.");
+      }
       return window.location.origin;
     }
   }
