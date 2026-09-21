@@ -16,8 +16,8 @@ export const TOKEN_COOKIE = "palatia_token";
 
 export { ROLE_HOME };
 
-export const API_URL =
-  process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const rawApiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+export const API_URL = rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 /** Server-side fetch to the Express API with an optional JWT. */
 export async function apiFetch<T>(

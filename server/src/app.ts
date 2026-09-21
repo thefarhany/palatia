@@ -14,7 +14,11 @@ export function createApp() {
   const app = express();
 
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGIN }));
+  const origins =
+    env.CORS_ORIGIN === "*"
+      ? true
+      : env.CORS_ORIGIN.split(",").map((s) => s.trim());
+  app.use(cors({ origin: origins, credentials: true }));
   app.use(express.json());
   // Populate req.user when a token is present; group gates do the rest.
   app.use(optionalAuth);

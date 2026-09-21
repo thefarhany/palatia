@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4000";
+const rawApiUrl = process.env.API_URL ?? "http://localhost:4000";
+const API_URL = rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl;
 const TOKEN_COOKIE = "palatia_token";
 
 /**

@@ -29,6 +29,7 @@ services:
       DATABASE_URL: mysql://${MYSQL_USER:-palatia_user}:${MYSQL_PASSWORD:-palatia_pass}@mysql:3306/${MYSQL_DATABASE:-palatia}
       JWT_SECRET: ${JWT_SECRET:-palatia_super_secret_jwt_key_2026}
       PORT: 4000
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
       NODE_ENV: production
     ports:
       - "4000:4000"
@@ -45,6 +46,7 @@ services:
       dockerfile: Dockerfile
     container_name: palatia-frontend
     environment:
+      API_URL: ${API_URL:-http://backend:4000/api}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
       NODE_ENV: production
     ports:

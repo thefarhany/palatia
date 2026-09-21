@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.API_URL ?? "http://backend:4000";
+const rawApiUrl = process.env.API_URL ?? "http://localhost:4000";
+const API_URL = rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -11,9 +12,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const backendUrl = API_URL.endsWith("/api") ? API_URL : `${API_URL}/api`;
-
-  const res = await fetch(`${backendUrl}/auth/login`, {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: body.email, password: body.password, surface: body.surface }),
