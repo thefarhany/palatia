@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldAlert, ArrowRight } from "lucide-react";
-import { ROLE_HOME } from "@/lib/auth-server";
+import { ROLE_HOME } from "@/lib/roles";
 import type { User } from "@/lib/types";
 
 export function StaffTopBanner({ user }: { user?: User | null }) {
