@@ -73,9 +73,9 @@ export default function LoginForm({
     if (!user) return;
     toast.success("Login successful — welcome back!");
     const next = params.get("next");
-
     const role = user.role as keyof typeof ROLE_HOME | undefined;
-    router.replace(next ?? (role ? ROLE_HOME[role] : "/"));
+    const target = next ?? (role ? ROLE_HOME[role] : "/");
+    window.location.href = target;
   };
 
   return (

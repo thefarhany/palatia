@@ -27,20 +27,6 @@ export async function login(email: string, password: string, surface?: "public" 
     throw new HttpError(401, "Invalid email or password");
   }
 
-  // Surface role guard: staff cannot login on public customer login, customers cannot login on staff login.
-  if (surface === "public" && user.role !== "CUSTOMER") {
-    throw new HttpError(
-      403,
-      `Anda terdeteksi sebagai akun STAF (${user.role}). Silakan login melalui Portal Staff.`
-    );
-  }
-  if (surface === "staff" && user.role === "CUSTOMER") {
-    throw new HttpError(
-      403,
-      "Anda bukan STAF. Silakan login melalui Portal Pelanggan."
-    );
-  }
-
   // Same public shape as register/me — passwordHash never leaves the service.
   return {
     token: signToken({ userId: user.id, role: user.role }),

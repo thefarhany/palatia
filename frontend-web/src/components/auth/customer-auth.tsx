@@ -46,7 +46,7 @@ export function CustomerAuth() {
       newAccount ? "Account created — welcome to Palatia!" : "Login successful — welcome back!",
     );
     const home = ROLE_HOME[role as keyof typeof ROLE_HOME];
-    router.replace(home ?? "/menu");
+    window.location.href = home ?? "/menu";
   };
 
   const loginForm = useForm<LoginValues>({
