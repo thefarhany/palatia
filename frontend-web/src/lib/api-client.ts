@@ -16,17 +16,25 @@ export async function apiClient<T>(
         : undefined,
   });
 
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as {
-      error?: string;
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok || (json && json.success === false)) {
+    const message = json.message || json.error || `API ${res.status}`;
+    const e = new Error(message) as Error & {
+      errorCode?: string;
       details?: Record<string, string[]>;
     };
-    const e = new Error(err.error ?? `API ${res.status}`) as Error & {
-      details?: Record<string, string[]>;
-    };
-    e.details = err.details;
+    e.errorCode = json.errorCode;
+    e.details = json.details;
     throw e;
   }
+
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+
+  // Transparently unwrap BaseResponse envelope if present
+  if (json && typeof json === "object" && "success" in json && "data" in json && json.data !== null) {
+    return json.data as T;
+  }
+
+  return json as T;
 }

@@ -36,5 +36,5 @@ RUN mkdir -p uploads/menu uploads/profile
 
 EXPOSE 4000
 
-# Run prisma migration then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Run prisma migration, seed default accounts, then start server
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/seed.js && node dist/server.js"]
