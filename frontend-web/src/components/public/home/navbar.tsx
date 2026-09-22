@@ -60,8 +60,14 @@ export function HomeNavbar({ initialUser = null }: HomeNavbarProps) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Hide Navbar on auth pages (/login, /register) and QR menu page (/menu?t=...)
-  if (pathname.startsWith("/login") || pathname.startsWith("/register") || isQrMenu) {
+  // Hide Navbar on auth pages (/login, /register), QR menu page (/menu?t=...), payment success page, and track page
+  if (
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/payment/success") ||
+    pathname.startsWith("/track") ||
+    isQrMenu
+  ) {
     return null;
   }
 

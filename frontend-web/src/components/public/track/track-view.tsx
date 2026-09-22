@@ -17,7 +17,7 @@ const STEPS = [
 
 function reachedStep(status: string, paymentStatus: string) {
   if (status === "COMPLETED") return 5;
-  if (status === "READY") return 4;
+  if (status === "READY" || status === "SERVED") return 4;
   if (status === "PREPARING") return 3;
   if (paymentStatus === "PAID") return 2;
   return 1;

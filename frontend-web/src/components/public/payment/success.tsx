@@ -28,10 +28,10 @@ export function PaymentSuccess({ token }: { token: string }) {
   };
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-white font-sans text-[#2b2119]">
+    <div className="flex min-h-svh flex-col bg-white font-sans text-[#2b2119]">
       <MinimalHeader token={token} onCopy={copy} copied={copied} />
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-6 py-4">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-6 sm:px-6 sm:py-8 pb-12">
         {failed && (
           <div className="rounded-2xl border border-[#fbeaea] bg-[#fbeaea] p-10 text-center">
             <p className="font-brand text-2xl font-semibold text-[#c0392b]">Order not found</p>

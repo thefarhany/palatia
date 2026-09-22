@@ -19,7 +19,15 @@ export function StaffTopBanner({ user }: { user?: User | null }) {
     }
   }, [pathname]);
 
-  if (!user || user.role === "CUSTOMER" || pathname.startsWith("/login") || pathname.startsWith("/register") || isQrMenu) {
+  if (
+    !user ||
+    user.role === "CUSTOMER" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/payment/success") ||
+    pathname.startsWith("/track") ||
+    isQrMenu
+  ) {
     return null;
   }
 
