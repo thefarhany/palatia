@@ -28,11 +28,16 @@ export function HomeNavbar() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isQrMenu, setIsQrMenu] = useState(false);
 
-  // Hide Navbar on customer/staff login and register pages
-  if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
-    return null;
-  }
+  // Check if current page is QR menu (?t=...) safely in client
+  useEffect(() => {
+    if (pathname === "/menu" && typeof window !== "undefined") {
+      setIsQrMenu(window.location.search.includes("t="));
+    } else {
+      setIsQrMenu(false);
+    }
+  }, [pathname]);
 
   // Fetch user profile on mount if token cookie exists
   useEffect(() => {
@@ -45,6 +50,11 @@ export function HomeNavbar() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  // Hide Navbar on auth pages (/login, /register) and QR menu page (/menu?t=...)
+  if (pathname.startsWith("/login") || pathname.startsWith("/register") || isQrMenu) {
+    return null;
+  }
 
   const doLogout = async () => {
     await logout();
@@ -59,54 +69,51 @@ export function HomeNavbar() {
         <Link href="/" className="font-brand text-2xl font-semibold text-[#2b2119]">
           Palatia
         </Link>
+
+        {/* Desktop Links */}
         <nav className="hidden items-center gap-8 text-sm md:flex">
           {NAV.map((n) => {
-            const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
+            const active = pathname === n.href;
             return (
               <Link
                 key={n.href}
                 href={n.href}
-                className={
-                  active ? "font-medium text-[#b8521f]" : "text-[#5c5147] hover:text-[#b8521f]"
-                }
+                className={`font-medium transition-colors ${
+                  active ? "text-[#b8521f]" : "text-[#5c5147] hover:text-[#2b2119]"
+                }`}
               >
                 {n.label}
               </Link>
             );
           })}
         </nav>
+
+        {/* Desktop CTA / Profile */}
         <div className="hidden items-center gap-3 md:flex">
           <Link
             href="/reservasi"
-            className={`rounded-lg ${RUST} px-4 py-2 text-sm font-semibold text-white transition-colors`}
+            className="rounded-lg bg-[#b8521f] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9c4519]"
           >
             Reserve a Table
           </Link>
-          {user && user.role === "CUSTOMER" ? (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button aria-label="Account menu" className="rounded-full transition-opacity hover:opacity-80">
-                  {user.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatar} alt="" className="size-9 rounded-full object-cover" />
-                  ) : (
-                    <span className="grid size-9 place-items-center rounded-full bg-[#b8521f] text-sm font-bold text-white">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                <button className="flex items-center gap-2 rounded-lg bg-[#f1ead9] px-4 py-2 text-sm font-semibold text-[#2b2119] transition-colors hover:bg-[#e9dfca]">
+                  <UserRound className="size-4 text-[#b8521f]" />
+                  <span>{user.name}</span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
-                  <Link href="/account?tab=profile" className="flex items-center gap-2">
-                    <UserRound className="size-4" /> Profile
+                  <Link href="/account" className="flex items-center gap-2 cursor-pointer">
+                    <UserRound className="size-4" />
+                    <span>Account Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={doLogout}
-                  className="flex items-center gap-2 text-[#c0392b] focus:text-[#c0392b]"
-                >
-                  <LogOut className="size-4" /> Logout
+                <DropdownMenuItem onClick={doLogout} className="flex items-center gap-2 text-red-600 cursor-pointer">
+                  <LogOut className="size-4" />
+                  <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -123,70 +130,60 @@ export function HomeNavbar() {
         {/* Mobile Hamburger Toggle */}
         <div className="flex items-center gap-2 md:hidden">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-            className="rounded-lg p-2 text-[#2b2119] hover:bg-[#f7ece4] focus:outline-none"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            aria-label="Toggle Navigation"
+            className="rounded-lg p-2 text-[#2b2119] hover:bg-[#f7ece4]"
           >
             {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation Dropdown */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="border-t border-[#f0e8de] bg-white px-6 pb-6 pt-4 md:hidden">
-          <nav className="flex flex-col gap-4 text-base">
+          <nav className="flex flex-col gap-3">
             {NAV.map((n) => {
-              const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
+              const active = pathname === n.href;
               return (
                 <Link
                   key={n.href}
                   href={n.href}
-                  className={
-                    active
-                      ? "font-semibold text-[#b8521f]"
-                      : "text-[#5c5147] hover:text-[#b8521f]"
-                  }
+                  className={`text-base font-medium py-1 transition-colors ${
+                    active ? "text-[#b8521f]" : "text-[#5c5147] hover:text-[#2b2119]"
+                  }`}
                 >
                   {n.label}
                 </Link>
               );
             })}
           </nav>
-          <div className="mt-6 flex flex-col gap-3 border-t border-[#f0e8de] pt-4">
+          <div className="mt-4 flex flex-col gap-2 pt-2 border-t border-[#f0e8de]">
             <Link
               href="/reservasi"
-              className={`w-full rounded-lg ${RUST} py-2.5 text-center text-sm font-semibold text-white transition-colors`}
+              className="w-full text-center rounded-lg bg-[#b8521f] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#9c4519]"
             >
               Reserve a Table
             </Link>
-            {user && user.role === "CUSTOMER" ? (
-              <div className="flex items-center justify-between pt-2">
+            {user ? (
+              <>
                 <Link
-                  href="/account?tab=profile"
-                  className="flex items-center gap-2 text-sm font-medium text-[#2b2119]"
+                  href="/account"
+                  className="w-full text-center rounded-lg bg-[#f1ead9] px-4 py-2.5 text-sm font-semibold text-[#2b2119] transition-colors hover:bg-[#e9dfca]"
                 >
-                  {user.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatar} alt="" className="size-8 rounded-full object-cover" />
-                  ) : (
-                    <span className="grid size-8 place-items-center rounded-full bg-[#b8521f] text-xs font-bold text-white">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                  Profile ({user.name})
+                  Account Profile ({user.name})
                 </Link>
                 <button
                   onClick={doLogout}
-                  className="flex items-center gap-1 text-xs font-semibold text-[#c0392b]"
+                  className="w-full text-center rounded-lg bg-red-100 px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-200"
                 >
-                  <LogOut className="size-4" /> Logout
+                  Logout
                 </button>
-              </div>
+              </>
             ) : (
               <Link
                 href="/login"
-                className="w-full rounded-lg bg-[#f1ead9] py-2.5 text-center text-sm font-semibold text-[#2b2119] transition-colors hover:bg-[#e9dfca]"
+                className="w-full text-center rounded-lg bg-[#f1ead9] px-4 py-2.5 text-sm font-semibold text-[#2b2119] transition-colors hover:bg-[#e9dfca]"
               >
                 Login
               </Link>

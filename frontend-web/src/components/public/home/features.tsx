@@ -9,12 +9,12 @@ const FEATURES = [
 
 export function HomeFeatures() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-16">
-      <p className="text-xs font-semibold tracking-[2px] text-[#b8521f]">WHY PALATIA</p>
-      <h2 className="mt-3 font-brand text-3xl font-semibold text-[#2b2119] md:text-4xl">
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
+      <p className="text-[11px] sm:text-xs font-semibold tracking-[2px] text-[#b8521f]">WHY PALATIA</p>
+      <h2 className="mt-2 font-brand text-2xl sm:text-3xl font-semibold text-[#2b2119] md:text-4xl">
         Great food, zero hassle.
       </h2>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 sm:mt-10 grid gap-3.5 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map((f, i) => (
           <div
             key={f.no}

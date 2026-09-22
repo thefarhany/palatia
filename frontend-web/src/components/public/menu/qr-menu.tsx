@@ -14,6 +14,7 @@ import type { MenuItem } from "@/lib/types";
 import { rp } from "@/lib/format";
 
 export function QrMenu({ token }: { token: string }) {
+  const [mounted, setMounted] = useState(false);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [category, setCategory] = useState("all");
@@ -30,6 +31,10 @@ export function QrMenu({ token }: { token: string }) {
     total: number;
   } | null>(null);
   const setTableToken = useCartStore((st) => st.setTableToken);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setTableToken(token);
@@ -64,8 +69,8 @@ export function QrMenu({ token }: { token: string }) {
     [items, category, query],
   );
 
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-  const cartSubtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const cartCount = mounted ? cart.reduce((s, i) => s + i.qty, 0) : 0;
+  const cartSubtotal = mounted ? cart.reduce((s, i) => s + i.price * i.qty, 0) : 0;
 
   return (
     <div className="flex min-h-svh flex-col bg-[#faf6f0] font-sans text-[#2b2119]">
@@ -91,7 +96,7 @@ export function QrMenu({ token }: { token: string }) {
             >
               <ShoppingBag className="size-3.5 sm:size-4" />
               <span>Cart</span>
-              {cartCount > 0 && (
+              {mounted && cartCount > 0 && (
                 <span className="ml-0.5 rounded-full bg-white px-1.5 py-0.5 text-[10px] sm:text-xs font-bold text-[#b8521f]">
                   {cartCount}
                 </span>
@@ -122,7 +127,7 @@ export function QrMenu({ token }: { token: string }) {
             {/* Banner Meja Responsive */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-[#f7ece4] p-4 sm:px-6 sm:py-5 border border-[#eedfd1]">
               <div className="flex items-center gap-3.5">
-                <span className="grid size-11 sm:size-12 shrink-0 place-items-center rounded-xl bg-[#b8521f] text-sm sm:text-base font-bold text-white shadow-sm">
+                <span className="grid size-11 sm:size-12 shrink-0 place-items-center rounded-xl bg-[#b8521f] text-sm sm:text-base font-bold text-white shadow-xs">
                   T{String(table?.number ?? "?").padStart(2, "0")}
                 </span>
                 <div>
@@ -188,13 +193,13 @@ export function QrMenu({ token }: { token: string }) {
                 </div>
               )}
               {filtered.map((item) => {
-                const cartItem = cart.find((c) => c.menuItemId === item.id);
+                const cartItem = mounted ? cart.find((c) => c.menuItemId === item.id) : undefined;
                 return (
                   <div
                     key={item.id}
                     className="flex flex-row sm:flex-col overflow-hidden rounded-2xl border border-[#f0e8de] bg-white shadow-xs transition-shadow hover:shadow-md"
                   >
-                    <div className="relative w-28 sm:w-full h-auto sm:h-44 shrink-0 bg-[#f7ece4]">
+                    <div className="relative w-24 sm:w-full h-24 sm:h-44 shrink-0 bg-[#f7ece4]">
                       {item.imageUrl && (
                         <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
                       )}
@@ -266,7 +271,7 @@ export function QrMenu({ token }: { token: string }) {
       />
 
       {/* Sticky Floating Mobile Cart Bar */}
-      {!invalid && cartCount > 0 && (
+      {!invalid && mounted && cartCount > 0 && (
         <div className="sticky bottom-0 z-40 bg-[#2b2119] px-4 py-3 sm:py-4 shadow-lg border-t border-white/10 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <div>

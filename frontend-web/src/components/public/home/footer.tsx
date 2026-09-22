@@ -33,20 +33,20 @@ export function HomeFooter({
 } = {}) {
   return (
     <footer id="contact" className="mt-auto bg-[#2b2119] text-white">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-14">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 sm:px-6 sm:py-14">
         <div>
-          <h2 className="font-brand text-3xl font-semibold">{ctaTitle}</h2>
-          <p className="mt-2 text-sm text-white/70">{ctaSubtitle ?? ""}</p>
+          <h2 className="font-brand text-2xl sm:text-3xl font-semibold">{ctaTitle}</h2>
+          <p className="mt-1.5 text-xs sm:text-sm text-white/70">{ctaSubtitle ?? ""}</p>
         </div>
         <Link
           href={ctaHref}
-          className="rounded-lg bg-[#b8521f] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#9c4519]"
+          className="rounded-lg bg-[#b8521f] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-colors hover:bg-[#9c4519]"
         >
           {ctaLabel}
         </Link>
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 sm:py-12 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <p className="font-brand text-2xl font-semibold">Palatia</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">

@@ -29,15 +29,15 @@ const GALLERY = [
 
 export function HomeGallery() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-16">
-      <h2 className="font-brand text-3xl font-semibold text-[#2b2119] md:text-4xl">
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
+      <h2 className="font-brand text-2xl sm:text-3xl font-semibold text-[#2b2119] md:text-4xl">
         Space &amp; plates.
       </h2>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 sm:mt-10 grid gap-3.5 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {GALLERY.map((item, i) => (
           <div
             key={item.label}
-            className="relative h-56 overflow-hidden rounded-2xl bg-[#f7ece4]"
+            className="relative h-44 sm:h-56 overflow-hidden rounded-2xl bg-[#f7ece4]"
           >
             <Image
               src={item.src}

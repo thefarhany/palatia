@@ -59,11 +59,11 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-2xl border border-[#f0e8de]">
+        <DialogHeader className="pr-8">
           <div className="flex items-center justify-between">
-            <DialogTitle className="font-brand text-xl font-semibold text-[#2b2119]">Payment</DialogTitle>
-            <span className="flex items-center gap-1.5 rounded-full bg-[#fbeaea] px-3 py-1 text-sm font-semibold text-[#c0392b]">
+            <DialogTitle className="font-brand text-xl font-bold text-[#2b2119]">Payment</DialogTitle>
+            <span className="flex items-center gap-1.5 rounded-full bg-[#fbeaea] px-2.5 py-0.5 text-xs font-bold text-[#c0392b]">
               ⏱ {mm}:{ss}
             </span>
           </div>
@@ -71,13 +71,13 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
         </DialogHeader>
 
         {/* Total tagihan */}
-        <div className="text-center">
+        <div className="text-center py-1">
           <p className="text-xs text-[#5c5147]">Total bill</p>
-          <p className="font-brand text-3xl font-semibold text-[#2b2119]">{rp.format(total)}</p>
+          <p className="font-brand text-2xl sm:text-3xl font-bold text-[#2b2119]">{rp.format(total)}</p>
         </div>
 
         {/* Methods */}
-        <div className="overflow-hidden rounded-2xl border border-[#f0e8de]">
+        <div className="overflow-hidden rounded-xl border border-[#f0e8de]">
           {METHODS.map((m, idx) => {
             const isSel = selected === m.name;
             const isExp = expanded === m.name && isSel && m.code === "QR";
@@ -92,18 +92,18 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
                   className="flex w-full items-center gap-3 bg-white px-3 py-2.5 text-left transition-colors hover:bg-[#faf6f0]"
                 >
                   <span
-                    className={`grid size-10 place-items-center rounded-xl text-xs font-bold ${
+                    className={`grid size-9 shrink-0 place-items-center rounded-lg text-xs font-bold ${
                       isSel ? "bg-[#b8521f] text-white" : "bg-[#f7ece4] text-[#2b2119]"
                     }`}
                   >
                     {m.code}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-[#2b2119]">{m.name}</span>
-                    <span className="block truncate text-xs text-[#5c5147]">{m.desc}</span>
+                    <span className="block text-xs sm:text-sm font-semibold text-[#2b2119]">{m.name}</span>
+                    <span className="block truncate text-[11px] text-[#5c5147]">{m.desc}</span>
                   </span>
                   <span
-                    className={`grid size-4 place-items-center rounded-full border-2 ${
+                    className={`grid size-4 shrink-0 place-items-center rounded-full border-2 ${
                       isSel ? "border-[#b8521f]" : "border-[#d0d5dd]"
                     }`}
                   >
@@ -112,11 +112,11 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
                   {m.expandable !== undefined && <ChevronDown className={`size-4 text-[#5c5147] transition-transform ${isExp ? "rotate-180" : ""}`} />}
                 </button>
                 {isExp && (
-                  <div className="bg-[#f2ede3] px-4 py-6 text-center">
-                    <div className="mx-auto grid size-32 place-items-center rounded-xl bg-white">
-                      <span className="text-[10px] tracking-widest text-[#c9b8a6]">QRIS</span>
+                  <div className="bg-[#f2ede3] p-4 text-center">
+                    <div className="mx-auto grid size-28 place-items-center rounded-xl bg-white shadow-xs">
+                      <span className="text-[10px] tracking-widest text-[#c9b8a6] font-bold">QRIS</span>
                     </div>
-                    <p className="mt-4 text-xs leading-relaxed text-[#5c5147]">
+                    <p className="mt-3 text-[11px] leading-relaxed text-[#5c5147]">
                       One QR for all apps — scan with GoPay, OVO, DANA, ShopeePay, or m-banking.
                     </p>
                   </div>
@@ -129,7 +129,7 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
         <button
           onClick={pay}
           disabled={paying || secondsLeft === 0 || paid}
-          className="w-full rounded-xl bg-[#b8521f] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60"
+          className="w-full rounded-xl bg-[#b8521f] py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98 shadow-xs"
         >
           {paid ? "Paid ✓" : `Pay Now · ${rp.format(total)}`}
         </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldAlert, ArrowRight } from "lucide-react";
@@ -8,8 +9,17 @@ import type { User } from "@/lib/types";
 
 export function StaffTopBanner({ user }: { user?: User | null }) {
   const pathname = usePathname();
+  const [isQrMenu, setIsQrMenu] = useState(false);
 
-  if (!user || user.role === "CUSTOMER" || pathname.startsWith("/login") || pathname.startsWith("/register")) {
+  useEffect(() => {
+    if (pathname === "/menu" && typeof window !== "undefined") {
+      setIsQrMenu(window.location.search.includes("t="));
+    } else {
+      setIsQrMenu(false);
+    }
+  }, [pathname]);
+
+  if (!user || user.role === "CUSTOMER" || pathname.startsWith("/login") || pathname.startsWith("/register") || isQrMenu) {
     return null;
   }
 

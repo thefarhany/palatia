@@ -20,16 +20,16 @@ export function HomeFeaturedMenu() {
   }, []);
 
   return (
-    <section id="menu" className="bg-[#f2ede3] py-16">
-      <div className="mx-auto max-w-6xl px-6">
-        <p className="text-xs font-semibold tracking-[2px] text-[#b8521f]">MOST LOVED</p>
-        <div className="mt-3 flex items-end justify-between">
-          <h2 className="font-brand text-3xl font-semibold text-[#2b2119] md:text-4xl">The crowd favorites.</h2>
-          <Link href="/menu" className="text-sm font-semibold text-[#b8521f] hover:underline">
+    <section id="menu" className="bg-[#f2ede3] py-10 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <p className="text-[11px] sm:text-xs font-semibold tracking-[2px] text-[#b8521f]">MOST LOVED</p>
+        <div className="mt-2 flex items-end justify-between">
+          <h2 className="font-brand text-2xl sm:text-3xl font-semibold text-[#2b2119] md:text-4xl">The crowd favorites.</h2>
+          <Link href="/menu" className="text-xs sm:text-sm font-semibold text-[#b8521f] hover:underline">
             View all menus
           </Link>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-6 sm:mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
           {featured.length === 0 && <p className="text-sm text-[#5c5147]">Menu coming soon.</p>}
           {featured.map((item, i) => (
             <div key={item.id} className="flex flex-col overflow-hidden rounded-2xl border border-[#f0e8de] bg-white">

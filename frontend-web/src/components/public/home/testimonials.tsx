@@ -18,10 +18,10 @@ const TESTIMONIALS = [
 
 export function HomeTestimonials() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pb-16">
-      <h2 className="font-brand text-3xl font-semibold text-[#2b2119] md:text-4xl">What they say.</h2>
-      <p className="mt-2 text-sm text-[#5c5147]">4.9/5 from 1,200+ customer reviews on Google Maps.</p>
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+    <section className="mx-auto w-full max-w-6xl px-4 pb-10 sm:px-6 sm:pb-16">
+      <h2 className="font-brand text-2xl sm:text-3xl font-semibold text-[#2b2119] md:text-4xl">What they say.</h2>
+      <p className="mt-1.5 text-xs sm:text-sm text-[#5c5147]">4.9/5 from 1,200+ customer reviews on Google Maps.</p>
+      <div className="mt-6 sm:mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {TESTIMONIALS.map((t) => (
           <div key={t.name} className="rounded-2xl border border-[#f0e8de] bg-white p-6">
             <p className="text-sm tracking-[2px] text-[#b8521f]">★★★★★</p>

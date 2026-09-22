@@ -70,14 +70,14 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-xl sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader className="pb-2">
-          <div className="flex items-center gap-2.5">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg max-h-[85vh] p-3.5 sm:p-6 gap-2.5 rounded-2xl border border-[#f0e8de] flex flex-col">
+        <DialogHeader className="pb-0 pr-8">
+          <div className="flex items-center gap-2">
             <DialogTitle className="font-brand text-xl sm:text-2xl font-bold text-[#2b2119]">
               Your Cart
             </DialogTitle>
             {tableNumber && (
-              <span className="rounded-full bg-[#f1ead9] px-3 py-0.5 text-xs font-semibold text-[#2b2119]">
+              <span className="rounded-full bg-[#f1ead9] px-2.5 py-0.5 text-xs font-semibold text-[#2b2119]">
                 Table {tableNumber}
               </span>
             )}
@@ -85,14 +85,14 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
           <DialogDescription className="sr-only">Your cart</DialogDescription>
         </DialogHeader>
 
-        {/* Responsive Items List */}
-        <div className="grid gap-3 py-2">
+        {/* Responsive Items List - Capped at ~350px, scrollable if items exceed height */}
+        <div className="max-h-[350px] sm:max-h-[380px] overflow-y-auto pr-1 grid gap-2.5 py-1">
           {items.map((line) => (
             <div
               key={line.lineId}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-[#f0e8de] bg-[#fdfbf7] p-3 sm:p-4"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-[#f0e8de] bg-[#fdfbf7] p-2.5 sm:p-4"
             >
-              <div className="flex items-start gap-3 min-w-0 flex-1">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
                 <div className="relative shrink-0">
                   <div className="relative size-12 sm:size-14 overflow-hidden rounded-xl bg-[#f7ece4]">
                     {line.imageUrl && (
@@ -102,11 +102,11 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
                 </div>
                 <div className="min-w-0 flex-1">
                   {line.category && (
-                    <span className="text-[9px] font-bold tracking-wider text-[#b8521f] uppercase">
+                    <span className="text-[10px] font-bold tracking-wider text-[#b8521f] uppercase">
                       {line.category}
                     </span>
                   )}
-                  <h4 className="text-xs sm:text-sm font-bold text-[#2b2119] line-clamp-1">
+                  <h4 className="text-sm font-bold text-[#2b2119] line-clamp-1">
                     {line.name}
                   </h4>
 
@@ -136,7 +136,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
                         setEditingNotes(line.lineId);
                         setNotesDraft(line.notes ?? "");
                       }}
-                      className="mt-1 flex items-center gap-1 rounded-md bg-[#f7ece4] px-2 py-0.5 text-[11px] text-[#5c5147] transition-colors hover:bg-[#ebdcd0]"
+                      className="mt-1 flex items-center gap-1 rounded-md bg-[#f7ece4] px-2 py-0.5 text-xs text-[#5c5147] transition-colors hover:bg-[#ebdcd0]"
                     >
                       <Pencil className="size-3 text-[#b8521f]" />
                       <span className="truncate max-w-[180px] sm:max-w-xs">
@@ -148,7 +148,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
               </div>
 
               {/* Controls & Price Row */}
-              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-dashed border-[#e4d9cc]">
+              <div className="flex items-center justify-between sm:justify-end gap-3 pt-1.5 sm:pt-0 border-t sm:border-0 border-dashed border-[#e4d9cc]">
                 <div className="flex items-center gap-2 rounded-lg bg-[#f7ece4] px-2 py-1">
                   <button
                     type="button"
@@ -160,7 +160,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
                   >
                     <Minus className="size-3" />
                   </button>
-                  <span className="w-5 text-center text-xs sm:text-sm font-bold text-[#2b2119]">
+                  <span className="w-5 text-center text-sm font-bold text-[#2b2119]">
                     {line.qty}
                   </span>
                   <button
@@ -174,7 +174,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm font-bold text-[#2b2119]">
+                  <span className="text-sm font-bold text-[#2b2119]">
                     {rp.format(line.price * line.qty)}
                   </span>
                   <button
@@ -192,7 +192,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
         </div>
 
         {/* Breakdown Totals */}
-        <div className="grid gap-1.5 border-t border-[#f0e8de] pt-3 text-xs sm:text-sm">
+        <div className="grid gap-1 border-t border-[#f0e8de] pt-2 text-xs sm:text-sm">
           <div className="flex justify-between text-[#5c5147]">
             <span>Subtotal</span>
             <span className="font-semibold text-[#2b2119]">{rp.format(subtotal)}</span>
@@ -205,7 +205,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
             <span>Service (5%)</span>
             <span className="font-semibold text-[#2b2119]">{rp.format(service)}</span>
           </div>
-          <div className="flex items-center justify-between border-t border-[#f0e8de] pt-2 mt-1">
+          <div className="flex items-center justify-between border-t border-[#f0e8de] pt-1.5 mt-0.5">
             <span className="text-sm sm:text-base font-bold text-[#2b2119]">TOTAL</span>
             <span className="font-brand text-lg sm:text-xl font-bold text-[#b8521f]">
               {rp.format(total)}
@@ -216,7 +216,7 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
         <button
           onClick={placeOrder}
           disabled={placing || items.length === 0}
-          className="mt-2 w-full rounded-xl bg-[#b8521f] py-3 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98"
+          className="mt-1.5 w-full rounded-xl bg-[#b8521f] py-3 text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98"
         >
           {placing ? "Placing Order…" : `Continue to Payment · ${rp.format(total)}`}
         </button>
