@@ -23,12 +23,23 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function HomeNavbar() {
+interface HomeNavbarProps {
+  initialUser?: User | null;
+}
+
+export function HomeNavbar({ initialUser = null }: HomeNavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(initialUser);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isQrMenu, setIsQrMenu] = useState(false);
+
+  // Sync state with initialUser prop when server re-renders
+  useEffect(() => {
+    if (initialUser !== undefined) {
+      setUser(initialUser);
+    }
+  }, [initialUser]);
 
   // Check if current page is QR menu (?t=...) safely in client
   useEffect(() => {
@@ -39,12 +50,10 @@ export function HomeNavbar() {
     }
   }, [pathname]);
 
-  // Fetch user profile on mount if token cookie exists
+  // Always fetch fresh user profile on client mount or route change
   useEffect(() => {
-    if (typeof document !== "undefined" && document.cookie.split(";").some((c) => c.trim().startsWith("token="))) {
-      meService.profile().then(setUser).catch(() => setUser(null));
-    }
-  }, []);
+    meService.profile().then(setUser).catch(() => setUser(null));
+  }, [pathname]);
 
   // Close mobile menu on route change
   useEffect(() => {

@@ -62,12 +62,15 @@ export function CustomerAuth() {
       const user = await login(v.email, v.password, "public");
       afterAuth(user.role, false);
     } catch (e) {
-      toast.error((e as Error).message);
-      setWarningBanner({
-        message: (e as Error).message,
-        targetUrl: "/login/staff",
-        targetLabel: "Portal Staff",
-      });
+      const msg = (e as Error).message || "Login failed";
+      toast.error(msg);
+      if (msg.toLowerCase().includes("terdeteksi") || msg.toLowerCase().includes("portal staff")) {
+        setWarningBanner({
+          message: msg,
+          targetUrl: "/login/staff",
+          targetLabel: "Portal Staff",
+        });
+      }
     }
   };
 

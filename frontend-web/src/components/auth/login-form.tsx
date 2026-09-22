@@ -60,13 +60,16 @@ export default function LoginForm({
     const surface = variant === "staff" ? "staff" : "public";
     const user = await login(data.email, data.password, surface).catch(
       (e: Error) => {
-        toast.error(e.message);
-        setWarningBanner({
-          message: e.message,
-          targetUrl: variant === "staff" ? "/login" : "/login/staff",
-          targetLabel:
-            variant === "staff" ? "Customer Portal" : "Staff Portal",
-        });
+        const msg = e.message || "Login failed";
+        toast.error(msg);
+        if (msg.toLowerCase().includes("terdeteksi") || msg.toLowerCase().includes("portal")) {
+          setWarningBanner({
+            message: msg,
+            targetUrl: variant === "staff" ? "/login" : "/login/staff",
+            targetLabel:
+              variant === "staff" ? "Customer Portal" : "Staff Portal",
+          });
+        }
         return null;
       },
     );

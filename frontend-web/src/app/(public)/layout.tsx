@@ -15,7 +15,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
       <div className="sticky top-0 z-50">
         <Suspense fallback={null}>
           <StaffTopBanner user={user} />
-          <HomeNavbar />
+          <HomeNavbar initialUser={user} />
         </Suspense>
       </div>
       {children}
