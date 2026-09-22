@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus, Pencil } from "lucide-react";
+import { Minus, Plus, Pencil, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -70,147 +70,155 @@ export function CartModal({ open, onClose, tableNumber, tableId, onPlaced }: Pro
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl sm:max-w-2xl p-6 sm:p-8">
+      <DialogContent className="max-w-xl sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="pb-2">
-          <div className="flex items-center gap-3">
-            <DialogTitle className="font-brand text-2xl font-semibold text-[#2b2119]">Cart</DialogTitle>
+          <div className="flex items-center gap-2.5">
+            <DialogTitle className="font-brand text-xl sm:text-2xl font-bold text-[#2b2119]">
+              Your Cart
+            </DialogTitle>
             {tableNumber && (
-              <span className="rounded-full bg-[#f1ead9] px-3.5 py-1 text-xs font-medium text-[#2b2119]">
-                Dine In · Table {tableNumber}
+              <span className="rounded-full bg-[#f1ead9] px-3 py-0.5 text-xs font-semibold text-[#2b2119]">
+                Table {tableNumber}
               </span>
             )}
           </div>
           <DialogDescription className="sr-only">Your cart</DialogDescription>
         </DialogHeader>
 
-        {/* Items */}
-        <div className="grid gap-4 py-2">
+        {/* Responsive Items List */}
+        <div className="grid gap-3 py-2">
           {items.map((line) => (
-            <div key={line.lineId} className="flex items-start gap-3 border-b border-[#f0e8de] pb-4 last:border-0">
-              <div className="relative">
-                <div className="relative size-14 overflow-hidden rounded-xl bg-[#f7ece4]">
-                  {line.imageUrl && (
-                    <Image src={line.imageUrl} alt={line.name} fill className="object-cover" />
-                  )}
+            <div
+              key={line.lineId}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-[#f0e8de] bg-[#fdfbf7] p-3 sm:p-4"
+            >
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="relative shrink-0">
+                  <div className="relative size-12 sm:size-14 overflow-hidden rounded-xl bg-[#f7ece4]">
+                    {line.imageUrl && (
+                      <Image src={line.imageUrl} alt={line.name} fill className="object-cover" />
+                    )}
+                  </div>
                 </div>
-                <span className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-[#b8521f] text-[11px] font-bold text-white">
-                  {line.qty}
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                {line.category && (
-                  <p className="text-[10px] font-semibold tracking-[2px] text-[#b8521f]">
-                    {line.category.toUpperCase()}
-                  </p>
-                )}
-                <p className="text-sm font-semibold text-[#2b2119]">{line.name}</p>
-                {editingNotes === line.lineId ? (
-                  <input
-                    autoFocus
-                    maxLength={150}
-                    value={notesDraft}
-                    onChange={(e) => setNotesDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                <div className="min-w-0 flex-1">
+                  {line.category && (
+                    <span className="text-[9px] font-bold tracking-wider text-[#b8521f] uppercase">
+                      {line.category}
+                    </span>
+                  )}
+                  <h4 className="text-xs sm:text-sm font-bold text-[#2b2119] line-clamp-1">
+                    {line.name}
+                  </h4>
+
+                  {editingNotes === line.lineId ? (
+                    <input
+                      autoFocus
+                      maxLength={150}
+                      value={notesDraft}
+                      onChange={(e) => setNotesDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          updateNotes(line.lineId, notesDraft);
+                          setEditingNotes(null);
+                        }
+                      }}
+                      onBlur={() => {
                         updateNotes(line.lineId, notesDraft);
                         setEditingNotes(null);
-                      }
-                    }}
-                    onBlur={() => {
-                      updateNotes(line.lineId, notesDraft);
-                      setEditingNotes(null);
-                    }}
-                    placeholder="Add note for kitchen..."
-                    className="mt-1.5 w-full rounded-lg border border-[#b8521f] bg-white px-2.5 py-1 text-xs text-[#2b2119] outline-none shadow-sm focus:ring-1 focus:ring-[#b8521f]"
-                  />
-                ) : (
+                      }}
+                      placeholder="Add note for kitchen..."
+                      className="mt-1 w-full rounded-lg border border-[#b8521f] bg-white px-2 py-1 text-xs text-[#2b2119] outline-none shadow-xs"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingNotes(line.lineId);
+                        setNotesDraft(line.notes ?? "");
+                      }}
+                      className="mt-1 flex items-center gap-1 rounded-md bg-[#f7ece4] px-2 py-0.5 text-[11px] text-[#5c5147] transition-colors hover:bg-[#ebdcd0]"
+                    >
+                      <Pencil className="size-3 text-[#b8521f]" />
+                      <span className="truncate max-w-[180px] sm:max-w-xs">
+                        {line.notes ? `Note: ${line.notes}` : "+ Add note"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Controls & Price Row */}
+              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-dashed border-[#e4d9cc]">
+                <div className="flex items-center gap-2 rounded-lg bg-[#f7ece4] px-2 py-1">
                   <button
                     type="button"
-                    onClick={() => {
-                      setEditingNotes(line.lineId);
-                      setNotesDraft(line.notes ?? "");
-                    }}
-                    className="mt-1.5 flex max-w-full items-start gap-1.5 rounded-md bg-[#f7ece4] px-2.5 py-1 text-left text-xs text-[#5c5147] transition-colors hover:bg-[#ebdcd0] hover:text-[#2b2119]"
-                    title="Click to edit note"
+                    aria-label="Decrease"
+                    onClick={() =>
+                      line.qty > 1 ? updateQty(line.lineId, line.qty - 1) : removeLine(line.lineId)
+                    }
+                    className="grid size-6 place-items-center rounded text-[#b8521f] hover:bg-[#f0d9c8]"
                   >
-                    <Pencil className="mt-0.5 size-3 shrink-0 text-[#b8521f]" />
-                    <span className="min-w-0 break-words line-clamp-2">
-                      {line.notes ? `note: ${line.notes}` : "+ Add note"}
-                    </span>
+                    <Minus className="size-3" />
                   </button>
-                )}
+                  <span className="w-5 text-center text-xs sm:text-sm font-bold text-[#2b2119]">
+                    {line.qty}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Increase"
+                    onClick={() => updateQty(line.lineId, line.qty + 1)}
+                    className="grid size-6 place-items-center rounded text-[#b8521f] hover:bg-[#f0d9c8]"
+                  >
+                    <Plus className="size-3" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs sm:text-sm font-bold text-[#2b2119]">
+                    {rp.format(line.price * line.qty)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeLine(line.lineId)}
+                    className="text-[#c0392b] hover:opacity-75 p-1"
+                    title="Remove item"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 rounded-lg bg-[#f7ece4] px-1.5 py-1">
-                <button
-                  type="button"
-                  aria-label="Decrease"
-                  onClick={() =>
-                    line.qty > 1 ? updateQty(line.lineId, line.qty - 1) : removeLine(line.lineId)
-                  }
-                  className="grid size-6 place-items-center rounded text-[#b8521f] hover:bg-[#f0d9c8]"
-                >
-                  <Minus className="size-3.5" />
-                </button>
-                <span className="w-7 text-center text-sm font-semibold text-[#2b2119]">x{line.qty}</span>
-                <button
-                  type="button"
-                  aria-label="Increase"
-                  onClick={() => updateQty(line.lineId, line.qty + 1)}
-                  className="grid size-6 place-items-center rounded text-[#b8521f] hover:bg-[#f0d9c8]"
-                >
-                  <Plus className="size-3.5" />
-                </button>
-              </div>
-              <button
-                type="button"
-                className="text-sm font-medium text-[#c0392b] hover:underline"
-                onClick={() => removeLine(line.lineId)}
-              >
-                Remove
-              </button>
-              <p className="w-24 text-right text-base font-semibold text-[#2b2119]">
-                {rp.format(line.price * line.qty)}
-              </p>
             </div>
           ))}
         </div>
 
-        {/* Totals */}
-        <div className="grid gap-2 border-t border-[#f0e8de] pt-4">
-          <div className="flex justify-between text-base">
-            <p className="text-[#5c5147]">Subtotal</p>
-            <p className="text-[#2b2119]">{rp.format(subtotal)}</p>
+        {/* Breakdown Totals */}
+        <div className="grid gap-1.5 border-t border-[#f0e8de] pt-3 text-xs sm:text-sm">
+          <div className="flex justify-between text-[#5c5147]">
+            <span>Subtotal</span>
+            <span className="font-semibold text-[#2b2119]">{rp.format(subtotal)}</span>
           </div>
-          <div className="flex justify-between text-base">
-            <p className="text-[#5c5147]">VAT (GST) 10%</p>
-            <p className="text-[#2b2119]">{rp.format(tax)}</p>
+          <div className="flex justify-between text-[#5c5147]">
+            <span>VAT (10%)</span>
+            <span className="font-semibold text-[#2b2119]">{rp.format(tax)}</span>
           </div>
-          <div className="flex justify-between text-base">
-            <p className="text-[#5c5147]">Service 5%</p>
-            <p className="text-[#2b2119]">{rp.format(service)}</p>
+          <div className="flex justify-between text-[#5c5147]">
+            <span>Service (5%)</span>
+            <span className="font-semibold text-[#2b2119]">{rp.format(service)}</span>
           </div>
-          <div className="flex items-center justify-between pt-1">
-            <p className="text-base font-bold text-[#2b2119]">TOTAL</p>
-            <p className="font-brand text-xl font-bold text-[#b8521f]">{rp.format(total)}</p>
+          <div className="flex items-center justify-between border-t border-[#f0e8de] pt-2 mt-1">
+            <span className="text-sm sm:text-base font-bold text-[#2b2119]">TOTAL</span>
+            <span className="font-brand text-lg sm:text-xl font-bold text-[#b8521f]">
+              {rp.format(total)}
+            </span>
           </div>
-        </div>
-
-        {/* Guest note */}
-        <div className="rounded-xl bg-[#f1ead9] px-4 py-3">
-          <p className="text-sm font-medium text-[#2b2119]">
-            Order as guest — Dine In from QR{tableNumber ? ` Table ${tableNumber}` : ""}.
-          </p>
-          <p className="mt-0.5 text-xs text-[#5c5147]">
-            Sign in/register for live notifications. Guests get a unique tracking link.
-          </p>
         </div>
 
         <button
           onClick={placeOrder}
           disabled={placing || items.length === 0}
-          className="w-full rounded-xl bg-[#b8521f] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60"
+          className="mt-2 w-full rounded-xl bg-[#b8521f] py-3 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98"
         >
-          {placing ? "Placing order…" : `Continue to Payment · ${rp.format(total)}`}
+          {placing ? "Placing Order…" : `Continue to Payment · ${rp.format(total)}`}
         </button>
       </DialogContent>
     </Dialog>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, RefreshCw } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import type { Order } from "@/lib/types";
 import { rp } from "@/lib/format";
@@ -12,10 +12,9 @@ const STEPS = [
   { label: "Paid" },
   { label: "Cooking" },
   { label: "Ready" },
-  { label: "Completed" },
+  { label: "Done" },
 ];
 
-// Status order → jumlah step yang tercapai.
 function reachedStep(status: string, paymentStatus: string) {
   if (status === "COMPLETED") return 5;
   if (status === "READY") return 4;
@@ -31,7 +30,6 @@ export function TrackView({ token }: { token: string }) {
   const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Initial fetch + polling 5s — setState hanya di callback (react-hooks rules).
   useEffect(() => {
     let alive = true;
     const load = () =>
@@ -43,7 +41,7 @@ export function TrackView({ token }: { token: string }) {
           if (alive) setFailed(true);
         });
     void load();
-    const poll = setInterval(load, 5000); // guest = polling 5s (docs)
+    const poll = setInterval(load, 5000);
     return () => {
       alive = false;
       clearInterval(poll);
@@ -60,10 +58,10 @@ export function TrackView({ token }: { token: string }) {
     return (
       <div className="flex h-svh flex-col overflow-hidden bg-white font-sans text-[#2b2119]">
         <MinimalHeader token={token} onCopy={copy} copied={copied} />
-        <main className="mx-auto max-w-2xl px-6 py-20">
-          <div className="rounded-2xl border border-[#fbeaea] bg-[#fbeaea] p-10 text-center">
-            <p className="font-brand text-2xl font-semibold text-[#c0392b]">Order not found</p>
-            <p className="mt-2 text-sm text-[#5c5147]">This tracking link is invalid or has been removed.</p>
+        <main className="mx-auto max-w-2xl px-4 sm:px-6 py-16 text-center">
+          <div className="rounded-2xl border border-[#fbeaea] bg-[#fbeaea] p-8 sm:p-10">
+            <p className="font-brand text-2xl font-bold text-[#c0392b]">Order Not Found</p>
+            <p className="mt-2 text-xs sm:text-sm text-[#5c5147]">This tracking link is invalid or has expired.</p>
           </div>
         </main>
       </div>
@@ -73,119 +71,133 @@ export function TrackView({ token }: { token: string }) {
   const step = order ? reachedStep(order.status, order.paymentStatus) : 0;
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-white font-sans text-[#2b2119]">
+    <div className="flex min-h-svh flex-col bg-[#faf6f0] font-sans text-[#2b2119]">
       <MinimalHeader token={token} onCopy={copy} copied={copied} />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 overflow-y-auto px-6 py-6">
-        {/* Title + status badge */}
-        <div className="flex flex-wrap items-center gap-4">
-          <h1 className="font-brand text-3xl font-semibold text-[#2b2119] md:text-4xl">
-            Order <span className="text-[#b8521f]">#{order?.code ?? "…"}</span>
-          </h1>
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        {/* Header Title + Status Badge */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="text-xs font-bold text-[#5c5147] uppercase tracking-wider">
+              Guest Order Tracking
+            </span>
+            <h1 className="font-brand text-2xl sm:text-3xl font-bold text-[#2b2119]">
+              Order <span className="text-[#b8521f]">#{order?.code ?? "…"}</span>
+            </h1>
+          </div>
           {order && (
             <span
-              className={`rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ${
+              className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${
                 order.status === "COMPLETED"
                   ? "bg-[#e7f2ec] text-[#2f7a52]"
                   : "bg-[#f1ead9] text-[#b8521f]"
               }`}
             >
               {order.status === "COMPLETED"
-                ? "DONE"
+                ? "COMPLETED"
                 : order.paymentStatus === "UNPAID"
                   ? "AWAITING PAYMENT"
-                  : "PAID"}
+                  : "PAID · PREPARING"}
             </span>
           )}
         </div>
 
-        {/* Stepper */}
-        <div className="mt-8 flex items-center">
-          {STEPS.map((s, i) => {
-            const done = i + 1 <= step;
-            return (
-              <div key={s.label} className={`flex items-center ${i < STEPS.length - 1 ? "flex-1" : ""}`}>
-                <div className="flex flex-col items-center">
-                  <span
-                    className={`grid size-9 place-items-center rounded-full text-sm font-bold ${
-                      done ? "bg-[#b8521f] text-white" : "bg-[#f1ead9] text-[#5c5147]"
-                    }`}
-                  >
-                    {done ? <Check className="size-4" /> : i + 1}
-                  </span>
-                  <p className={`mt-2 text-xs font-medium whitespace-nowrap ${done ? "text-[#2b2119]" : "text-[#9a8f83]"}`}>
-                    {s.label}
-                  </p>
+        {/* Responsive Horizontal Stepper */}
+        <div className="mt-6 sm:mt-8 rounded-2xl bg-white p-4 sm:p-6 border border-[#f0e8de] shadow-xs">
+          <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2 scrollbar-none">
+            {STEPS.map((s, i) => {
+              const done = i + 1 <= step;
+              return (
+                <div key={s.label} className="flex items-center flex-1 min-w-[60px]">
+                  <div className="flex flex-col items-center mx-auto">
+                    <span
+                      className={`grid size-8 sm:size-10 place-items-center rounded-full text-xs sm:text-sm font-bold transition-all ${
+                        done ? "bg-[#b8521f] text-white shadow-xs" : "bg-[#f1ead9] text-[#5c5147]"
+                      }`}
+                    >
+                      {done ? <Check className="size-3.5 sm:size-4" /> : i + 1}
+                    </span>
+                    <span className={`mt-1.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap ${done ? "text-[#2b2119]" : "text-[#9a8f83]"}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div className={`h-1 flex-1 rounded-full ${i + 1 < step ? "bg-[#b8521f]" : "bg-[#f1ead9]"}`} />
+                  )}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`mx-3 h-1 flex-1 rounded-full ${i + 1 < step ? "bg-[#b8521f]" : "bg-[#f1ead9]"}`} />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* Banner notifikasi guest */}
-        <div className="mt-8 rounded-2xl bg-[#f7ece4] px-5 py-4">
-          <p className="text-sm font-semibold text-[#2b2119]">This page is your notification (guest).</p>
-          <p className="mt-1 text-xs text-[#5c5147]">
-            Save this link: palatia.id/track/{token} — status updates automatically every 5 seconds.
-          </p>
+        {/* Auto Refresh Notice */}
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-[#f7ece4] px-4 py-3 text-xs text-[#5c5147]">
+          <span className="flex items-center gap-2 font-medium">
+            <RefreshCw className="size-3.5 animate-spin text-[#b8521f]" />
+            Auto-updating status every 5 seconds
+          </span>
+          {order?.table && (
+            <span className="font-bold text-[#2b2119]">
+              Table {order.table.number}
+            </span>
+          )}
         </div>
 
-        {/* Summary */}
-        {!order && <p className="mt-10 text-sm text-[#5c5147]">Loading your order…</p>}
+        {/* Order Details */}
+        {!order && (
+          <div className="mt-8 text-center text-sm text-[#5c5147]">Loading order details…</div>
+        )}
         {order && (
-          <div className="mt-6 rounded-2xl border border-[#f0e8de] bg-white p-5 md:p-6">
-            <p className="text-lg font-semibold text-[#2b2119]">
-              Dine In{order.table ? ` · Table ${order.table.number}` : ""} · {order.items.length} item
-              {order.items.length > 1 ? "s" : ""}
-            </p>
-            <div className="mt-4 grid gap-3">
+          <div className="mt-6 rounded-2xl border border-[#f0e8de] bg-white p-4 sm:p-6 shadow-xs">
+            <h2 className="text-base sm:text-lg font-bold text-[#2b2119]">
+              Order Items ({order.items.length})
+            </h2>
+            <div className="mt-3 divide-y divide-[#f0e8de]">
               {order.items.map((i) => (
-                <div key={i.id}>
-                  <div className="flex items-center justify-between text-sm">
-                    <p className="font-semibold text-[#2b2119]">
+                <div key={i.id} className="py-2.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
+                  <div>
+                    <p className="font-bold text-[#2b2119]">
                       {i.qty}× {i.menuItem.name}
                     </p>
-                    <p className="text-[#2b2119]">{rp.format(i.unitPrice * i.qty)}</p>
+                    {i.notes && <p className="text-[11px] text-[#5c5147]">Note: {i.notes}</p>}
                   </div>
-                  {i.notes && <p className="pl-6 text-xs text-[#5c5147]">note: {i.notes}</p>}
+                  <span className="font-semibold text-[#2b2119] shrink-0">
+                    {rp.format(i.unitPrice * i.qty)}
+                  </span>
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-[#f0e8de] pt-4">
-              <p className="text-sm font-semibold text-[#2b2119]">Total paid</p>
-              <p className="font-brand text-xl font-semibold text-[#b8521f]">{rp.format(order.total)}</p>
+            <div className="mt-4 flex items-center justify-between border-t border-[#f0e8de] pt-3 text-sm sm:text-base font-bold text-[#2b2119]">
+              <span>Total Paid</span>
+              <span className="font-brand text-lg sm:text-xl font-bold text-[#b8521f]">
+                {rp.format(order.total)}
+              </span>
             </div>
-            <p className="mt-3 text-xs text-[#5c5147]">
-              This page is your notification — status updates automatically. Keep this link.
-            </p>
           </div>
         )}
 
-        {/* Ada yang salah */}
+        {/* Contact Support */}
         {order && (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#f0e8de] bg-white p-6">
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-[#f0e8de] bg-white p-4 sm:p-6">
             <div>
-              <p className="text-sm font-semibold text-[#2b2119]">Something wrong with your order?</p>
-              <p className="mt-1 text-xs text-[#5c5147]">
-                Call the cashier or phone +62 812-3456-7890 — mention the order code.
+              <p className="text-sm font-bold text-[#2b2119]">Need help with your order?</p>
+              <p className="mt-0.5 text-xs text-[#5c5147]">
+                Contact restaurant staff or cashier directly.
               </p>
             </div>
             <a
               href="https://wa.me/6281234567890"
-              className="rounded-xl border border-[#e4d9cc] bg-white px-5 py-2.5 text-sm font-semibold text-[#2b2119] transition-colors hover:border-[#b8521f]"
+              className="w-full sm:w-auto text-center rounded-xl border border-[#e4d9cc] bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#2b2119] transition-colors hover:border-[#b8521f]"
             >
-              Contact Us
+              Contact Staff
             </a>
           </div>
         )}
       </main>
 
-      {/* Footer mini */}
-      <footer className="border-t border-[#f0e8de] bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-6 text-center text-xs text-[#5c5147]">
+      {/* Footer */}
+      <footer className="mt-auto border-t border-[#f0e8de] bg-white py-4">
+        <div className="mx-auto max-w-4xl px-4 text-center text-xs text-[#5c5147]">
           © 2026 Palatia Restaurant. All rights reserved.
         </div>
       </footer>
@@ -203,21 +215,18 @@ export function MinimalHeader({
   copied: boolean;
 }) {
   return (
-    <header className="border-b border-[#f0e8de]">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="font-brand text-2xl font-semibold text-[#2b2119]">
+    <header className="border-b border-[#f0e8de] bg-white/95 backdrop-blur-md">
+      <div className="mx-auto flex h-14 sm:h-16 max-w-4xl items-center justify-between px-4 sm:px-6">
+        <Link href="/" className="font-brand text-xl sm:text-2xl font-bold text-[#2b2119]">
           Palatia
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="hidden rounded-full bg-[#f1ead9] px-4 py-2 text-sm text-[#5c5147] sm:block">
-            palatia.id/track/{token}
-          </span>
+        <div className="flex items-center gap-2">
           <button
             onClick={onCopy}
-            aria-label="Copy tracking link"
-            className="grid size-10 place-items-center rounded-full bg-[#b8521f] text-white transition-colors hover:bg-[#9c4519]"
+            className="flex items-center gap-1.5 rounded-lg bg-[#b8521f] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#9c4519]"
           >
-            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+            <span>{copied ? "Copied!" : "Copy Tracking Link"}</span>
           </button>
         </div>
       </div>
