@@ -40,6 +40,9 @@ blob-report/
 .last-run.json
 coverage/
 
+# PDF & Generated Documents
+*.pdf
+
 # OS metadata
 .DS_Store
 Thumbs.db
