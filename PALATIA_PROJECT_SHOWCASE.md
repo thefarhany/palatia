@@ -145,32 +145,6 @@ To prevent authorization ambiguity, the system enforces strict surface scoping:
 
 ---
 
-## 🎨 AI Slide Deck Generation Prompt & Slide Outline
-
-Use the prompt below to generate a presentation deck via **Gamma AI**, **ChatGPT (with SlidesGPT)**, **Tome**, or **Beautiful.ai**:
-
-```text
-PROMPT FOR AI SLIDE GENERATION:
-"Create a 10-slide startup pitch and technical showcase deck based on the following product document for 'Palatia — Integrated QR Self-Ordering & Real-Time Restaurant OS'.
-
-Use a modern, professional color palette: Deep Espresso (#2b2119), Terracotta Rust (#b8521f), Warm Cream (#faf6f0), and White (#ffffff). 
-
-Slide Outline:
-Slide 1: Title Slide — Palatia: Integrated QR Self-Ordering & Real-Time Restaurant OS.
-Slide 2: The Problem — Traditional Restaurant Pain Points (Slow Ordering, Kitchen Errors, Lack of Customer Visibility, Stock Loss).
-Slide 3: The Solution — All-in-One Restaurant OS (QR Ordering, Live Cooking Tracker, KDS, Waiter POS, Controlled Stock).
-Slide 4: Customer Journey — Scan QR, Select & Note, E-Wallet Pay, Live Tracker.
-Slide 5: Kitchen & Waiter Operations — KDS Screen, Recipe Modal, Waiter Table Map, Food Delivery Dispatch.
-Slide 6: Inventory & Controlled Recipes — Automated Ingredient Deduction & Stockroom Management.
-Slide 7: Technical Architecture — Next.js 16, TypeScript, Node.js Express, Prisma PostgreSQL, Socket.io.
-Slide 8: Security & Engineering Highlights — Surface Authorization Guards, httpOnly JWT, Base Response Pattern, Global Error Boundaries.
-Slide 9: Business Value & Metrics — Faster Table Turnover, 0 Order Errors, 100% Stock Accuracy.
-Slide 10: Conclusion & Demo Call-to-Action — Live Demo Link, GitHub Repository, Contact Details.
-"
-```
-
----
-
 ## 📄 Document Information
 * **Project Name:** Palatia Restaurant Management & Guest Self-Order System
 * **Author / Lead Engineer:** Farhan (`thefarhany`)
