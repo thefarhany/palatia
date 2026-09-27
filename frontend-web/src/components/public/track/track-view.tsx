@@ -104,25 +104,28 @@ export function TrackView({ token }: { token: string }) {
 
         {/* Responsive Horizontal Stepper */}
         <div className="mt-6 sm:mt-8 rounded-2xl bg-white p-4 sm:p-6 border border-[#f0e8de] shadow-xs">
-          <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-start justify-between overflow-x-auto pb-2 scrollbar-none">
             {STEPS.map((s, i) => {
               const done = i + 1 <= step;
+              const nextDone = i + 2 <= step;
               return (
-                <div key={s.label} className="flex items-center flex-1 min-w-[60px]">
-                  <div className="flex flex-col items-center mx-auto">
+                <div key={s.label} className="flex flex-1 items-start last:flex-initial min-w-[56px] sm:min-w-[70px]">
+                  <div className="flex flex-col items-center">
                     <span
-                      className={`grid size-8 sm:size-10 place-items-center rounded-full text-xs sm:text-sm font-bold transition-all ${
+                      className={`grid size-9 sm:size-10 place-items-center rounded-full text-xs sm:text-sm font-bold transition-all shrink-0 ${
                         done ? "bg-[#b8521f] text-white shadow-xs" : "bg-[#f1ead9] text-[#5c5147]"
                       }`}
                     >
-                      {done ? <Check className="size-3.5 sm:size-4" /> : i + 1}
+                      {done ? <Check className="size-4" /> : i + 1}
                     </span>
-                    <span className={`mt-1.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap ${done ? "text-[#2b2119]" : "text-[#9a8f83]"}`}>
+                    <span className={`mt-2 text-[11px] sm:text-xs font-semibold whitespace-nowrap text-center ${done ? "text-[#2b2119]" : "text-[#9a8f83]"}`}>
                       {s.label}
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={`h-1 flex-1 rounded-full ${i + 1 < step ? "bg-[#b8521f]" : "bg-[#f1ead9]"}`} />
+                    <div className="flex-1 flex items-center h-9 sm:h-10 px-1.5 sm:px-2.5">
+                      <div className={`h-1 w-full rounded-full transition-colors ${nextDone ? "bg-[#b8521f]" : "bg-[#e4d9cc]"}`} />
+                    </div>
                   )}
                 </div>
               );
