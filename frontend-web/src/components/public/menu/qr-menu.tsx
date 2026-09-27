@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingBag } from "lucide-react";
+import { Search, ShoppingBag, ArrowRight } from "lucide-react";
 import { menuService } from "@/services/menu-service";
 import { publicService, type ResolvedTable } from "@/services/public-service";
 import { useCartStore } from "@/store/cart-store";
@@ -284,9 +284,10 @@ export function QrMenu({ token }: { token: string }) {
             </div>
             <button
               onClick={() => setCartOpen(true)}
-              className="rounded-xl bg-[#b8521f] px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-md transition-colors hover:bg-[#9c4519] active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl bg-[#b8521f] px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-md transition-colors hover:bg-[#9c4519] active:scale-95"
             >
-              Checkout Now →
+              <span>Checkout Now</span>
+              <ArrowRight className="size-3.5 sm:size-4" />
             </button>
           </div>
         </div>

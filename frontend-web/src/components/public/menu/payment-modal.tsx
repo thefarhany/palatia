@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -129,9 +129,15 @@ export function PaymentModal({ open, onClose, trackingToken, total }: Props) {
         <button
           onClick={pay}
           disabled={paying || secondsLeft === 0 || paid}
-          className="w-full rounded-xl bg-[#b8521f] py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98 shadow-xs"
+          className="w-full rounded-xl bg-[#b8521f] py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white transition-colors hover:bg-[#9c4519] disabled:opacity-60 active:scale-98 shadow-xs flex items-center justify-center gap-1.5"
         >
-          {paid ? "Paid ✓" : `Pay Now · ${rp.format(total)}`}
+          {paid ? (
+            <>
+              <Check className="size-4" /> Paid
+            </>
+          ) : (
+            `Pay Now · ${rp.format(total)}`
+          )}
         </button>
       </DialogContent>
     </Dialog>

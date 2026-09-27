@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Check } from "lucide-react";
 import { reservationsService, type TableAvailability } from "@/services/reservations-service";
 
 // Harus sama dengan SLOTS di server (validators/reservations.ts).
@@ -264,7 +265,11 @@ export function ReservationForm() {
             >
               <p className={`text-base font-semibold ${selectedId === t.id ? "text-[#b8521f]" : "text-[#2b2119]"}`}>
                 T-{String(t.number).padStart(2, "0")}
-                {selectedId === t.id && <span className="ml-2 text-xs font-medium">← selected</span>}
+                {selectedId === t.id && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-xs font-semibold text-[#b8521f]">
+                    <Check className="size-3.5" /> Selected
+                  </span>
+                )}
               </p>
               <p className="text-sm text-[#5c5147]">
                 {t.capacity} guests{" "}

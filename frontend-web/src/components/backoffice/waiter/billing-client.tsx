@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Printer, Receipt, Search, Loader2 } from "lucide-react";
+import { Printer, Receipt, Search, Loader2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -347,12 +347,14 @@ export function BillingClient({
 
               {/* Payment Status / Action */}
               {invoice.paymentStatus === "PAID" ? (
-                <div className="rounded-lg bg-[#067647]/10 p-3 text-center text-sm font-semibold text-[#067647]">
-                  ✓ Lunas ({invoice.paymentMethod === "CASH" ? "Tunai" : "Kartu"})
+                <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#067647]/10 p-3 text-center text-sm font-semibold text-[#067647]">
+                  <Check className="size-4 shrink-0" />
+                  <span>Lunas ({invoice.paymentMethod === "CASH" ? "Tunai" : "Kartu"})</span>
                 </div>
               ) : invoice.status === "CANCELLED" ? (
-                <div className="rounded-lg bg-[#c0392b]/10 p-3 text-center text-sm font-semibold text-[#c0392b]">
-                  ✕ Order Dibatalkan (CANCELLED)
+                <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#c0392b]/10 p-3 text-center text-sm font-semibold text-[#c0392b]">
+                  <X className="size-4 shrink-0" />
+                  <span>Order Dibatalkan (CANCELLED)</span>
                 </div>
               ) : (
                 <div className="grid gap-2 border-t border-[#e4e7ec] pt-3 dark:border-border">

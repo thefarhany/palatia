@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { BookOpen, ChefHat, Loader2, Search, Sparkles } from "lucide-react";
+import { BookOpen, ChefHat, Loader2, Search, Sparkles, ArrowRight } from "lucide-react";
 import type { MenuItem } from "@/lib/types";
 import { menuService } from "@/services/menu-service";
 import { rp } from "@/lib/format";
@@ -160,8 +160,9 @@ export default function ChefRecipePage() {
                         <Sparkles className="size-3" />
                         {hasRecipe ? `${item.recipeCount} Bahan` : "Lihat Resep"}
                       </span>
-                      <span className="text-[11px] font-semibold text-[#4f46e5] group-hover:underline">
-                        Buka →
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4f46e5] group-hover:underline">
+                        <span>Buka</span>
+                        <ArrowRight className="size-3" />
                       </span>
                     </div>
                   </div>
