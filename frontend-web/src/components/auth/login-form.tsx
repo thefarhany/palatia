@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -49,6 +49,7 @@ export default function LoginForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -162,16 +163,35 @@ export default function LoginForm({
             {COPY[variant].caption}
           </p>
 
-          {COPY[variant].roles.length > 0 && (
-            <div className="flex justify-center gap-2">
-              {COPY[variant].roles.map((r) => (
-                <span
-                  key={r}
-                  className="rounded-full bg-[#f1f2f4] px-2.5 py-1 text-[11px] font-medium text-[#667085] dark:bg-muted dark:text-muted-foreground"
-                >
-                  {r}
+          {variant === "staff" && (
+            <div className="rounded-xl border border-[#e4d9cc] bg-[#fdfbf7] p-3 dark:border-border dark:bg-card/50">
+              <div className="flex items-center justify-between pb-2 border-b border-[#f0e8de] dark:border-border">
+                <span className="text-[11px] font-bold text-[#b8521f] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-[#b8521f]" /> Quick Demo Accounts
                 </span>
-              ))}
+                <span className="text-[10px] text-[#667085]">Password: password123</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 pt-2">
+                {[
+                  { label: "Admin", email: "admin@palatia.id" },
+                  { label: "Chef", email: "chef@palatia.id" },
+                  { label: "Waiter", email: "waiter@palatia.id" },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setValue("email", item.email, { shouldValidate: true });
+                      setValue("password", "password123", { shouldValidate: true });
+                      toast.info(`Auto-filled ${item.label} credentials!`);
+                    }}
+                    className="flex flex-col items-center rounded-lg border border-[#e4d9cc] bg-white p-1.5 text-center transition-all hover:border-[#b8521f] hover:bg-[#f7ece4]/50 active:scale-95 shadow-2xs cursor-pointer"
+                  >
+                    <span className="text-xs font-bold text-[#2b2119]">{item.label}</span>
+                    <span className="text-[9px] text-[#667085] truncate max-w-full">{item.email.split("@")[0]}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
