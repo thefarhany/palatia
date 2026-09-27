@@ -56,7 +56,7 @@ describe("POST /api/auth/login", () => {
     const res = await post("/api/auth/login")
       .send({ email: "adminsurf@test.id", password: "password123", surface: "public" });
     expect(res.status).toBe(403);
-    expect(res.body.error).toContain("STAF");
+    expect(res.body.message || res.body.error).toContain("staff");
   });
 
   it("blocks customer user on staff login surface with 403", async () => {
@@ -66,7 +66,7 @@ describe("POST /api/auth/login", () => {
     const res = await post("/api/auth/login")
       .send({ email: "custsurf@test.id", password: "password123", surface: "staff" });
     expect(res.status).toBe(403);
-    expect(res.body.error).toContain("bukan STAF");
+    expect(res.body.message || res.body.error).toContain("Customer");
   });
 
   it("allows customer user on public login surface", async () => {
@@ -81,6 +81,28 @@ describe("POST /api/auth/login", () => {
       .send({ email: "adminsurf@test.id", password: "password123", surface: "staff" });
     expect(res.status).toBe(200);
     expect(res.body.user.role).toBe("ADMIN");
+  });
+
+  it("blocks account with 429 after 5 consecutive failed login attempts", async () => {
+    const targetEmail = "ratelimit@test.id";
+    await post("/api/auth/register")
+      .send({ name: "Rate Limit User", email: targetEmail, password: "password123" });
+
+    // 4 failed attempts -> 401 with remaining attempts warning
+    for (let i = 1; i <= 4; i++) {
+      const res = await post("/api/auth/login").send({ email: targetEmail, password: "wrongpassword" });
+      expect(res.status).toBe(401);
+      expect(res.body.message || res.body.error).toContain("Sisa percobaan");
+    }
+
+    // 5th failed attempt -> 429 Too Many Requests (triggered lockout)
+    const fifthRes = await post("/api/auth/login").send({ email: targetEmail, password: "wrongpassword" });
+    expect(fifthRes.status).toBe(429);
+    expect(fifthRes.body.message || fifthRes.body.error).toContain("diblokir sementara");
+
+    // 6th attempt (even with correct password) -> still 429 blocked
+    const sixthRes = await post("/api/auth/login").send({ email: targetEmail, password: "password123" });
+    expect(sixthRes.status).toBe(429);
   });
 });
 

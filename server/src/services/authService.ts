@@ -3,6 +3,7 @@ import type { Role } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { signToken } from "../lib/auth.js";
 import { HttpError } from "../lib/httpError.js";
+import { checkRateLimit, recordFailedAttempt, recordLoginSuccess } from "./loginRateLimiter.js";
 
 export const publicUser = {
   id: true,
@@ -21,11 +22,31 @@ export async function register(name: string, email: string, password: string) {
   return { token: signToken({ userId: user.id, role: user.role }), user };
 }
 
-export async function login(email: string, password: string, surface?: "public" | "staff") {
+
+export async function login(email: string, password: string, surface?: "public" | "staff", clientIp?: string) {
+  const lock = checkRateLimit(email, clientIp);
+  if (lock.isBlocked) {
+    throw new HttpError(
+      429,
+      `Terlalu banyak percobaan login gagal. Akun ini diblokir sementara selama ${lock.remainingMinutes} menit.`,
+    );
+  }
+
   const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
   if (!user || !user.isActive || !(await bcrypt.compare(password, user.passwordHash))) {
-    throw new HttpError(401, "Invalid email or password");
+    const failed = recordFailedAttempt(email, clientIp);
+    if (failed.isBlocked) {
+      throw new HttpError(
+        429,
+        `Terlalu banyak percobaan login gagal. Akun ini diblokir sementara selama ${failed.remainingMinutes} menit.`,
+      );
+    }
+    const remainingInfo = failed.attemptsLeft > 0 ? ` (Sisa percobaan: ${failed.attemptsLeft}x)` : "";
+    throw new HttpError(401, `Invalid email or password${remainingInfo}`);
   }
+
+  // Credentials are valid -> reset failed attempts counter
+  recordLoginSuccess(email, clientIp);
 
   if (surface === "public" && user.role !== "CUSTOMER") {
     throw new HttpError(
@@ -40,6 +61,8 @@ export async function login(email: string, password: string, surface?: "public" 
       "Akun Customer terdeteksi. Portal Staff khusus untuk karyawan & admin.",
     );
   }
+
+  // Same public shape as register/me — passwordHash never leaves the service.
 
   // Same public shape as register/me — passwordHash never leaves the service.
   return {

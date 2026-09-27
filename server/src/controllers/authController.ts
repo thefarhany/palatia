@@ -8,7 +8,8 @@ export function register(req: Request, res: Response, next: NextFunction) {
 
 export function login(req: Request, res: Response, next: NextFunction) {
   const { email, password, surface } = req.body;
-  svc.login(email, password, surface).then((r) => res.json(r)).catch(next);
+  const ip = req.ip || req.socket.remoteAddress;
+  svc.login(email, password, surface, ip).then((r) => res.json(r)).catch(next);
 }
 
 export function me(req: Request, res: Response, next: NextFunction) {

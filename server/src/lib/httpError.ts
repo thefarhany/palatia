@@ -2,7 +2,7 @@
 // maps status codes. Services stay HTTP-free.
 export class HttpError extends Error {
   constructor(
-    public status: 400 | 401 | 403 | 404 | 409,
+    public status: 400 | 401 | 403 | 404 | 409 | 429,
     message: string
   ) {
     super(message);
