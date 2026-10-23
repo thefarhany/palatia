@@ -1,13 +1,13 @@
 # Step 1: Dependencies stage
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:24-alpine AS deps
+RUN apk update && apk upgrade --no-cache && apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 # Step 2: Builder stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -18,7 +18,8 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Step 3: Runner stage (lightweight production runtime)
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
+RUN apk update && apk upgrade --no-cache
 WORKDIR /app
 
 ENV NODE_ENV=production

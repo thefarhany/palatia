@@ -19,6 +19,47 @@ Content-Type: application/json
 
 ---
 
+## 🔑 0. Authentication & Security API (`/api/auth`)
+
+Public entry points for authentication, protected by progressive rate limiting.
+
+### `POST /api/auth/register`
+Create a new `CUSTOMER` account.
+- **Request Body**:
+```json
+{
+  "name": "Budi Customer",
+  "email": "budi@palatia.id",
+  "password": "password123"
+}
+```
+- **Response `201 Created`**: Returns JWT access token and user profile payload.
+
+### `POST /api/auth/login`
+Authenticate user with email and password.
+- **Request Body**:
+```json
+{
+  "email": "admin@palatia.id",
+  "password": "password123",
+  "surface": "staff"
+}
+```
+- **Response `200 OK`**: Returns JWT access token and public user object.
+- **Response `401 Unauthorized`** (Failed Attempt): Returns error with remaining attempt counter (e.g. `"Invalid email or password (Sisa percobaan: 3x)"`).
+- **Response `429 Too Many Requests`** (Brute-Force Lockout): Triggered on 5 consecutive failed attempts per account/IP.
+```json
+{
+  "success": false,
+  "message": "Terlalu banyak percobaan login gagal. Akun ini diblokir sementara selama 5 menit.",
+  "errorCode": "TOO_MANY_REQUESTS",
+  "data": null
+}
+```
+*Note*: Lockout penalty follows a progressive scale: 1st lockout = 5 minutes, 2nd lockout = 15 minutes, 3rd+ lockout = 60 minutes. Successful login resets counter to 0.
+
+---
+
 ## 🌐 1. Public API Surface (`/api/public`)
 
 Mounted without authentication requirements (guest accessible).

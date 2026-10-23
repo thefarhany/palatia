@@ -132,13 +132,14 @@ All API responses follow a uniform JSON structure across all endpoints:
 }
 ```
 
-### 2. Surface Guard Security Pattern
-To prevent authorization ambiguity, the system enforces strict surface scoping:
-* **Public Surface (`surface = "public"`)**: Accepts only `CUSTOMER` accounts.
-* **Staff Surface (`surface = "staff"`)**: Accepts only `ADMIN`, `CHEF`, and `WAITER` accounts.
+### 2. Surface Guard & Progressive Rate Limiter Security
+To prevent authorization ambiguity and credential stuffing:
+* **Surface Isolation Guard:** Public Surface (`surface = "public"`) accepts only `CUSTOMER` accounts; Staff Surface (`surface = "staff"`) accepts only `ADMIN`, `CHEF`, and `WAITER` accounts.
+* **Progressive Rate Limiter & Brute-Force Protection:** In-memory rate limiting capping failed login attempts at 5 tries per account/IP. Applies progressive lockout penalties (5m ➔ 15m ➔ 60m) returning HTTP `429 Too Many Requests`, auto-resetting on valid authentication.
 
 ### 3. Positive & Negative UX Flow
 * **Inline Field Validation:** Instant feedback on invalid inputs using `zodResolver`.
+* **1-Click Quick Demo Accounts:** Interactive demo login card on `/login/staff` for instant 1-tap testing of backoffice roles.
 * **Global Error Boundary (`error.tsx`):** Unhandled runtime exceptions render a friendly retry interface instead of a white screen.
 * **Custom 404 Page (`not-found.tsx`):** Styled 404 page encouraging user recovery to home or menu.
 * **Dynamic Layout Math:** Responsive modals with dynamic height caps (`max-h-[350px] overflow-y-auto`) and pinned checkout buttons for effortless single-hand mobile use.

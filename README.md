@@ -71,9 +71,11 @@ flowchart LR
 * **Automatic Stock Deduction:** Deducts ingredient inventories upon order placement and restores stock if an order is cancelled.
 * **Purchase Orders & Audit Logs:** Complete tracking for supplier intake, stock adjustments, and inventory variance logs.
 
-### 🔒 6. Multi-Role Authorization & Surface Protection (`/login`, `/login/staff`)
+### 🔒 6. Multi-Role Authorization & Security Protection (`/login`, `/login/staff`)
 * **Role-Based Access Control (RBAC):** `ADMIN`, `CHEF`, `WAITER`, `CUSTOMER`.
 * **Surface Isolation Guard:** Middleware rejects staff accounts attempting to log in on public customer portals and vice versa with friendly portal redirect guidance.
+* **Progressive Rate Limiter & Brute-Force Lockout:** Prevents credential stuffing by tracking failed login attempts per account/IP. Limits to 5 failed attempts before applying progressive lockout penalties (5m ➔ 15m ➔ 60m) with HTTP `429 Too Many Requests` responses and instant reset on valid authentication.
+* **1-Click Quick Demo Accounts:** Interactive demo login card on `/login/staff` providing 1-tap credential auto-fill for Admin, Chef, and Waiter backoffice testing.
 * **`httpOnly` JWT Cookie Security:** Prevents token exposure and client-side XSS vulnerabilities.
 
 ---
@@ -149,9 +151,9 @@ To prevent authorization ambiguity, the system enforces strict surface scoping:
 ## ⚡ Getting Started (Local Development)
 
 ### Prerequisites
-* **Node.js**: `v20.x` or higher
+* **Node.js**: `v24.22.1+` or `v22.23.4+` (Patched against CVE-2026-111497)
 * **npm**: `v10.x` or higher
-* **PostgreSQL**: `v15.x` or higher (or Docker)
+* **PostgreSQL / MySQL**: MySQL 8.x (or Docker)
 
 ### 1. Clone & Install Dependencies
 

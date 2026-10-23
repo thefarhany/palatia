@@ -68,13 +68,13 @@ Three groups, each mounted with its own auth gate (`src/routes/public.ts` / `me.
 | Group | Gate | Endpoints |
 |---|---|---|
 | **`/api/public`** | none | `GET /menu` (+ `/categories`, includes `isFeatured` badge) · `POST /orders` (optional auth: guest = DINE_IN from QR, JWT = member) · `GET /table/:token` (QR resolve) · `GET /orders/:trackingToken` (guest tracking) · `POST /orders/:trackingToken/pay` (guest Pay Now) · **reservations: `GET /reservations/availability?date&slot`, `POST /reservations` (guest — name+phone inline, no login)** |
-| **`/api/auth`** | public | `POST /register`, `POST /login` |
+| **`/api/auth`** | public + rate limiter | `POST /register`, `POST /login` (protected by in-memory progressive rate limiter: 5 attempts max, 5m/15m/60m progressive lockout) |
 | **`/api/me`** | JWT (CUSTOMER only for orders/reservations via `requireCustomer`) | `GET /profile` · orders: `POST /orders`, `GET /orders`, `GET /orders/:id`, `POST /:id/pay`, `PATCH /:id/cancel`, `GET /:id/invoice` · reservations: `GET /availability?date&slot`, `POST /`, `GET /`, `PATCH /:id/status` · notifications: `GET /`, `PATCH /read-all`, `PATCH /:id/read` · `POST /uploads/avatar` |
 | **`/api/bo`** | JWT + staff (ADMIN/CHEF/WAITER) | orders: `POST /orders`, `GET /orders` (CHEF role receives PAID orders only), `GET /:id`, `PATCH /:id/status`, `PATCH /:id/cancel`, `POST /:id/pay`, `PATCH /:id/discount` · reservations: `GET /`, `PATCH /:id/status` · menu (ADMIN, CHEF read): `GET /`, `POST /`, `PATCH /:id`, `DELETE /:id` · staff (ADMIN): `GET /staff`, `POST /staff`, `PATCH /staff/:id` · tables (ADMIN): `GET /`, `POST /`, `PATCH /:id`, `GET /:id/qr.png`, `POST /:id/qr` (rotate = revoke) · inventory (ADMIN, CHEF read recipe): `GET/POST/PATCH /ingredients`, `GET/PUT /recipes/:menuItemId` (CHEF read-only via `GET /recipes/:menuItemId`), `GET/POST /purchase-orders`, `PATCH /purchase-orders/:id/receive|cancel` · `POST /uploads/menu` (ADMIN: slugified filename `<slug>.<ext>`, auto-cleanup of obsolete disk image files) · reports (ADMIN): `GET /sales/daily`, `GET /sales/popular` · `GET /audit` (ADMIN) |
 
 Client → group mapping: **PWA & Web Customer** = `/api/me` + `/api/public` · **Web backoffice** = `/api/bo` (+ `/api/me` for personal notifications) · **Public web menu** = `/api/public` only.
 
-Rules: Zod validation middleware on every write; RBAC middleware per route; `requireCustomer` on customer order/reservation endpoints; JWT required except auth + public menu.
+Rules: Zod validation middleware on every write; RBAC middleware per route; `requireCustomer` on customer order/reservation endpoints; JWT required except auth + public menu; `loginRateLimiter` progressive lockout middleware protecting `/api/auth/login` returning HTTP 429.
 
 ## Socket.IO Events (server → client)
 

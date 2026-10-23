@@ -12,6 +12,14 @@ const TOKEN_COOKIE = "palatia_token";
  * (image uploads) and JSON without Node stream socket drops.
  */
 async function forward(req: NextRequest, path: string) {
+  const reqEncoding = req.headers.get("content-encoding")?.toLowerCase();
+  if (reqEncoding && reqEncoding.includes("br")) {
+    return NextResponse.json(
+      { success: false, message: "Unsupported Content-Encoding: br" },
+      { status: 415 }
+    );
+  }
+
   const token = (await cookies()).get(TOKEN_COOKIE)?.value;
   const reqContentType = req.headers.get("content-type") ?? "";
   const isJson = reqContentType.includes("application/json");
@@ -30,6 +38,7 @@ async function forward(req: NextRequest, path: string) {
   const res = await fetch(`${API_URL}/api${path}`, {
     method: req.method,
     headers: {
+      "Accept-Encoding": "gzip, deflate",
       ...(reqContentType ? { "Content-Type": reqContentType } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },

@@ -19,7 +19,22 @@ export function createApp() {
       ? true
       : env.CORS_ORIGIN.split(",").map((s) => s.trim());
   app.use(cors({ origin: origins, credentials: true }));
-  app.use(express.json());
+
+  // Defense-in-depth against CVE-2026-111497 (Node.js Brotli decoder RCE) & payload bombs:
+  // Reject Brotli-encoded request payloads and cap JSON body size to 100kb.
+  app.use((req, res, next) => {
+    const encoding = req.headers["content-encoding"]?.toLowerCase();
+    if (encoding && encoding.includes("br")) {
+      return res.status(415).json({
+        success: false,
+        message: "Unsupported Content-Encoding: br",
+        errorCode: "UNSUPPORTED_MEDIA_TYPE",
+        data: null,
+      });
+    }
+    next();
+  });
+  app.use(express.json({ limit: "100kb" }));
   // Populate req.user when a token is present; group gates do the rest.
   app.use(optionalAuth);
 
