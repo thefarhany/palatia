@@ -42,6 +42,8 @@ coverage/
 
 # PDF & Generated Documents
 *.pdf
+palatia-slide-deck/
+palatia-slide-deck.zip
 
 # OS metadata
 .DS_Store
